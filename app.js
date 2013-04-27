@@ -18,6 +18,8 @@ var everyauth = require('everyauth');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test');
 
+//declare our models
+var DropboxUser = require('./models/user.js');
 
 
 console.log(configs.db_consumerKey);
@@ -32,6 +34,7 @@ everyauth.dropbox
   .findOrCreateUser(function (sess, accessToken, accessSecret, user) {
     //login to database logic goes here!!
     console.log(sess);
+    console.log('#######user: ', typeof(user.uid));
     console.log(accessToken);
     console.log(accessSecret);
     console.log(user);
@@ -64,8 +67,11 @@ app.get('/users', user.list);
 app.get('/login', function(req, res) {
   res.render('login', {});
 });
-//everyauth.helpExpress(app);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+
+
+
