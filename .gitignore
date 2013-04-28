@@ -1,3 +1,5 @@
 node_modules
 node_modules/*
 configuration.js
+public/node_modules
+public/node_modules/*
