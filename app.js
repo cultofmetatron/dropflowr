@@ -8,7 +8,8 @@ var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var everyauth = require('everyauth');
-var Q = require('q');
+var Dropbox = require('dropbox');
+var dropboxClient = null; //is initialized on every req/response cycle
 
 var ROOT = __dirname + '';
 
@@ -21,6 +22,27 @@ mongoose.connect('mongodb://localhost/disco1');
 
 //declare our models
 var DropboxUser = require('./models/user.js')(mongoose);
+
+//get dropbox data on every request cycle
+var dropboxObject = function(req, res, next) {
+  if (req.user) {
+    var accessToken = req.session.dropboxTokens.accessToken;
+    var accessSecret = req.session.dropboxTokens.accessSecret;
+
+     dropboxClient = new Dropbox.Client({
+          key: configs.db_consumerKey,
+          secret: configs.db_consumerSecret,
+          token: accessToken,
+          tokenSecret: accessSecret,
+          uid: req.user.uid,
+          sandbox: true
+      });
+  }
+    if (next) {next();}
+};
+
+
+
 
 //everyauth configuration
 everyauth.everymodule.userPkey('uid');
@@ -47,15 +69,14 @@ everyauth.dropbox
           accessToken: accessToken,
           accessSecret: accessSecret
         };
+
         promise.fulfill(user);
       } else {
         console.log('##############there was an error!!! ###################');
         return promise.fulfill({uid: 0 });
       }
     });
-    var usr = promise;
-    console.log('usr is a twit', usr);
-    return usr;
+    return promise;
   })
   .redirectPath('/');
 
@@ -70,13 +91,12 @@ app.use(express.cookieParser('your secret here'));
 app.use(express.session());
 app.use(express.methodOverride());
 app.use(everyauth.middleware(app));
+app.use(dropboxObject);
 //app.use(express.session({ secret: 'htuayreve', store: MemStore({reapInterval: 60000 * 10})}));
 app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(app.router);
-
-everyauth.helpExpress(app);
 
 // development only
 if ('development' == app.get('env')) {
@@ -90,10 +110,15 @@ app.get('/', function(req, res) {
 
   res.render('index', {
     title: "yay",
-    user : everyauth.user
+    everyuser : (function() { return (req.user) ? req.user.display_name : "log in"; })()
   });
 
 });
+
+
+
+
+
 /*
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
