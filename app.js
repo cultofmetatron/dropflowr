@@ -41,44 +41,23 @@ var dropboxObject = function(req, res, next) {
     if (next) {next();}
 };
 
+var loggedInGuard = function(req, res, next) {
+  if (req.user) {
+    //user is logged in
+    next();
+  } else {
+    //user is not logged in
+    console.log(req);
+    req.session.forwardUrl = req.route.path;
+    res.redirect('/login');
+    //next(); ?
+  }
+};
 
 
 
-//everyauth configuration
-everyauth.everymodule.userPkey('uid');
-everyauth.everymodule.findUserById( function (userId, callback) {
-//  User.findById(userId, callback);
-  // callback has the signature, function (err, user) {...}
-//}
-  DropboxUser.findUser(userId, function(err, user) {
-    callback(err, user);
-  });
-});
-
-everyauth.dropbox
-  .consumerKey(configs.db_consumerKey)
-  .consumerSecret(configs.db_consumerSecret)
-  .findOrCreateUser(function (sess, accessToken, accessSecret, user) {
-    console.log('session', sess);
-    //login to database logic goes here!!
-    var promise = this.Promise();
-    DropboxUser.findOrCreateUser(user, function(err, user) {
-      if (user) {
-        //user was either found or created and we can create the session
-        sess.dropboxTokens = {
-          accessToken: accessToken,
-          accessSecret: accessSecret
-        };
-
-        promise.fulfill(user);
-      } else {
-        console.log('##############there was an error!!! ###################');
-        return promise.fulfill({uid: 0 });
-      }
-    });
-    return promise;
-  })
-  .redirectPath('/');
+//configures the session handlers for dropbox
+require('./authentication.js')(everyauth, DropboxUser, configs);
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -103,8 +82,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', function(req, res) {
-  console.log('req.session', req.session);
+app.get('/', loggedInGuard ,function(req, res) {
+  console.log('########### req.route', req.route);
   console.log('req.user', req.user);
   //(req.session.auth) ? console.log('req.auth', req.session.auth.dropbox.loggedIn): null;
 
@@ -115,6 +94,9 @@ app.get('/', function(req, res) {
 
 });
 
+app.get('/login', function(req, res) {
+  res.render('login', {});
+});
 
 
 
