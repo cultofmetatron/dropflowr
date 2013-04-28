@@ -2,17 +2,18 @@
  * Module dependencies.
  */
 var configs = require ('./configuration.js');
-var express = require('express')
-  , routes = require('./routes')
-  , http = require('http')
-  , path = require('path');
-
+var connect = require('connect');
+var express = require('express');
+var routes = require('./routes');
+var http = require('http');
+var path = require('path');
+var everyauth = require('everyauth');
 var Q = require('q');
 
 var ROOT = __dirname + '';
 
 var app = express();
-var everyauth = require('everyauth');
+
 everyauth.debug = true;
 //mongodb database
 var mongoose = require('mongoose');
@@ -40,19 +41,20 @@ everyauth.dropbox
   .findOrCreateUser(function (sess, accessToken, accessSecret, user) {
     console.log('session', sess);
     //login to database logic goes here!!
-    var deferred = Q.defer();
+    var promise = this.Promise();
     DropboxUser.findOrCreateUser(user, function(err, user) {
       if (user) {
         //user was either found or created and we can create the session
         console.log('######## ', user, user.uid);
-        deferred.resolve(user);
+        promise.fulfill(user);
       } else {
         console.log('##############there was an error!!! ###################');
-        return deferred.resolve(0);
+        return promise.fulfill({uid: 0 });
       }
     });
-
-    return deferred.promise;
+    var usr = promise;
+    console.log('usr is a twit', usr);
+    return usr;
   })
   .redirectPath('/');
 
@@ -63,14 +65,17 @@ app.set('view engine', 'hbs');
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
 app.use(express.session());
+app.use(express.methodOverride());
+app.use(everyauth.middleware(app));
 //app.use(express.session({ secret: 'htuayreve', store: MemStore({reapInterval: 60000 * 10})}));
 app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(everyauth.middleware(app));
+
 app.use(app.router);
+
+everyauth.helpExpress(app);
 
 // development only
 if ('development' == app.get('env')) {
@@ -79,22 +84,25 @@ if ('development' == app.get('env')) {
 
 app.get('/', function(req, res) {
   console.log('req.session', req.session);
-  debugger
+  console.log('req.user', req.user);
+  //(req.session.auth) ? console.log('req.auth', req.session.auth.dropbox.loggedIn): null;
+
   res.render('index', {
     title: "yay",
     user : everyauth.user
   });
 
 });
-app.get('/login', function(req, res) {
-  option = {};
-  if (req.user) { console.log(req.user); }
-  res.render('login', option);
-});
-
+/*
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+*/
+
+app.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});
+
 
 
 
