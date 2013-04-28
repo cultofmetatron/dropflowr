@@ -11,7 +11,7 @@
     "hjs": "*",
     "less-middleware": "*",
     "hbs" : "*",
-    "everyauth" : "*",
+    "everyauth" : "https://github.com/bnoguchi/everyauth/archive/express3.tar.gz",
     "mongoose"  : "*",
     "dropbox"   : "*",
     "async"     : "*",

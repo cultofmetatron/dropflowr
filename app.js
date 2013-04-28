@@ -28,9 +28,7 @@ everyauth.everymodule.findUserById( function (userId, callback) {
 //  User.findById(userId, callback);
   // callback has the signature, function (err, user) {...}
 //}
-  console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%findUserById in app.js');
   DropboxUser.findUser(userId, function(err, user) {
-    console.log('got the user &&&&&&&&&&&&&&& ', user);
     callback(err, user);
   });
 });
@@ -45,7 +43,10 @@ everyauth.dropbox
     DropboxUser.findOrCreateUser(user, function(err, user) {
       if (user) {
         //user was either found or created and we can create the session
-        console.log('######## ', user, user.uid);
+        sess.dropboxTokens = {
+          accessToken: accessToken,
+          accessSecret: accessSecret
+        };
         promise.fulfill(user);
       } else {
         console.log('##############there was an error!!! ###################');
