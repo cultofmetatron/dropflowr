@@ -23,7 +23,7 @@ mongoose.connect('mongodb://localhost/disco1');
 //declare our models
 var DropboxUser = require('./models/user.js')(mongoose);
 
-//get dropbox data on every request cycle
+//get dropbox data on every request cyclen if logged in
 var dropboxObject = function(req, res, next) {
   if (req.user) {
     var accessToken = req.session.dropboxTokens.accessToken;
@@ -42,15 +42,25 @@ var dropboxObject = function(req, res, next) {
 };
 
 var loggedInGuard = function(req, res, next) {
-  if (req.user) {
-    //user is logged in
-    next();
+  if (!req.xhr) { // not an ajax call
+    if (req.user) {
+      //user is logged in
+      next();
+    } else {
+      //user is not logged in
+      console.log(req);
+      req.session.forwardUrl = req.route.path;
+      res.redirect('/login');
+      //next(); ?
+    }
   } else {
-    //user is not logged in
-    console.log(req);
-    req.session.forwardUrl = req.route.path;
-    res.redirect('/login');
-    //next(); ?
+    if (req.user) {
+      //user logged in
+      next();
+    } else {
+      //TODO create json response to failed login
+
+    }
   }
 };
 
@@ -82,13 +92,21 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+
+
+
+// we redirect the user to /public where we can load the rich client
 app.get('/', loggedInGuard ,function(req, res) {
+  res.redirect('/public');
+});
+
+app.get('/public', loggedInGuard ,function(req, res) {
   console.log('########### req.route', req.route);
   console.log('req.user', req.user);
   //(req.session.auth) ? console.log('req.auth', req.session.auth.dropbox.loggedIn): null;
 
   res.render('index', {
-    title: "yay",
+    title: "DropFlowr",
     everyuser : (function() { return (req.user) ? req.user.display_name : "log in"; })()
   });
 
