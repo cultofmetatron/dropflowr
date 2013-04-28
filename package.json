@@ -11,8 +11,9 @@
     "less-middleware": "*",
     "hbs" : "*",
     "everyauth" : "*",
-    "mongoose" : "*",
-    "dropbox" : "*",
-    "async"   : "*"
+    "mongoose"  : "*",
+    "dropbox"   : "*",
+    "async"     : "*",
+    "q"         : "*"
   }
 }

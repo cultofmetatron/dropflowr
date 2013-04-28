@@ -19,6 +19,7 @@ module.exports = function(mongoose) {
 
   //return a user if he exists in our database already
   DropboxUserSchema.statics.findUser = function(uid, callback) {
+    console.log('it gets here');
     DropboxUser.findOne({
       uid: uid
     }, callback );
@@ -29,10 +30,12 @@ module.exports = function(mongoose) {
    * stack to callback(err, user) is called
    */
   DropboxUserSchema.statics.findOrCreateUser = function(user, callback) {
+    console.log('in findOrCreateUser');
     DropboxUser.findUser(user.uid, function(err, usr) {
-      if (!user) {
+      if (!usr) {
+        console.log('user was not found, creating one now');
         //user not found so we shall create one
-        var newUser = DropboxUser.create({
+        var newUser = new DropboxUser({
           uid            : user.uid,
           id             : user.id,
           referal_link   : user.referal_link,
@@ -41,23 +44,31 @@ module.exports = function(mongoose) {
           country        : user.country,
           quota_info     : user.quota_info
         });
+        console.log('newUser', newUser);
         newUser.save(function(err) {
+          console.log('user was successfuly saved');
           if (err) {return callback(err, null); }
           //save was successful!!
           else { return callback(null, newUser); }
         });
       } else {
         //user exists so we update the validated user's info
+        console.log('&&&&&&&&&&& usr', usr);
         DropboxUser.update({uid: usr.uid}, {
           referal_link   : user.referal_link,
           display_name   : user.display_name,
           email          : user.email,
           country        : user.country,
           quota_info     : user.quota_info
+        }, function(err, numAffected, raw) {
+          if (err) {
+            console.log('error: ' + err );
+          }
+          //pass info back up the stack
+          console.log('does this run?');
+          return callback(null, usr);
         });
-        //pass info back up the stack
-        callback(null, usr);
-      }
+              }
     });
   };
 
