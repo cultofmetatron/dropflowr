@@ -130,11 +130,77 @@ app.get('/doo', loggedInGuard, function(req, res) {
 
 });
 
-app.get('/dir/*', loggedInGuard ,function(req, res) {
+app.get('/file/*', loggedInGuard, function(req, res) {
+  var filePath = '/' + req.params;
+  dropboxClient.metadata(filePath,  {} ,function(err, data) {
+    if (err) { console.log(err); }
+    var output = {};
+    output[filePath] = data._json;
+    res.end(JSON.stringify(output));
+  });
+});
+
+var getDirectoryInfo = function(req, res) {
+  dropboxClient.readdir('/' + req.params , function(error, entries) {
+    if (error) {
+      return error;
+    }
+
+    var directoryObject = {};
+    var allGotten = Q.defer();
+    var entriesCount = 0;
+    entries.forEach(function(entry) {
+      console.log('%%%%%%%%%%%', req.params);
+      var item = req.params + '/' + entry;
+      console.log(item);
+      dropboxClient.metadata(item,  {} ,function(err, data) {
+        if (err) { console.log(err); }
+        console.log('the data: ' ,data);
+        directoryObject[item] = data._json;
+        entriesCount++;
+        if (entriesCount === entries.length) {
+          allGotten.resolve();
+        }
+      });
+    });
+    Q.when(allGotten.promise).then(function() {
+      console.log('directory object', directoryObject);
+      res.end(JSON.stringify(directoryObject));
+    });
+  });
+};
+
+app.get('/dir/*', loggedInGuard , getDirectoryInfo );
+
+  /*
+  //yes, it returns a value!
+  console.log(req.params);
+  var param = '/' + req.params.join('');
+  var DObject = {};
+  var deff;
+  var item = directoryEach( param, function(entry, dData, resol) {
+    console.log('######  ', dData);
+    var directory = req.params.join('/') + '/' + entry;
+    console.log(param);
+    dropboxClient.metadata(param, function(err, data) {
+      if (err) { console.log(err); }
+      //console.log(data);
+      DObject[path] = data;
+      console.log('ddata: ', dData);
+      deff = resol.promise;
+    });
+  });
+  console.log('item: ', item.promise);
+  Q.when(deff).then(function() {
+    res.end(JSON.stringify(DObject));
+  });
+  */
+
+
+  /*
   console.log('________________________________');
   //console.log('req.query', req.query);
   //console.log('req.params', req.params);
-
   dropboxClient.readdir('/' + req.params , function(error, entries) {
     if (error) {
       return error;
@@ -163,9 +229,42 @@ app.get('/dir/*', loggedInGuard ,function(req, res) {
       res.end(JSON.stringify(directoryObject));
     });
   });
+  */
 
-});
+//takes a route, and callback and funs through it all
+var directoryEach = function(directory, callback) {
+  var retVal = Q.defer();
+  console.log('path: ', directory);
+  dropboxClient.readdir(directory, {}, function(error, entries) {
+    if (error) {
+      return error;
+    }
 
+    var directoryObject = {};
+    var allGotten = Q.defer();
+    var entriesCount = 0;
+    entries.forEach(function(entry) {
+      callback(entry, directoryObject, allGotten);
+      entriesCount++;
+      if (entriesCount >= entries.length) {
+        console.log('yes, it gets resolved');
+        console.log(directoryObject);
+        allGotten.resolve(directoryObject);
+      }
+    });
+
+    Q.when(allGotten.promise).then(function() {
+      console.log('####################################');
+      console.log('directory', directoryObject);
+      retVal.resolve(directoryObject);
+      return directoryObject;
+    });
+
+    //return retVal.resolve(end.promise);
+  });
+
+  return retVal;
+};
 
 
 
