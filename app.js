@@ -7,6 +7,8 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
+var querystring = require('querystring');
+var Q    = require('q');
 var everyauth = require('everyauth');
 var Dropbox = require('dropbox');
 var dropboxClient = null; //is initialized on every req/response cycle
@@ -35,7 +37,7 @@ var dropboxObject = function(req, res, next) {
           token: accessToken,
           tokenSecret: accessSecret,
           uid: req.user.uid,
-          sandbox: true
+          sandbox: false
       });
   }
     if (next) {next();}
@@ -115,6 +117,56 @@ app.get('/public', loggedInGuard ,function(req, res) {
 app.get('/login', function(req, res) {
   res.render('login', {});
 });
+
+
+//the dropbox file access directives
+
+app.get('/doo', loggedInGuard, function(req, res) {
+  var direc = "Public/resume.pdf";
+  dropboxClient.metadata(direc,  {} ,function(err, data) {
+    if (err) { console.log(err); }
+    res.end(JSON.stringify(data));
+  });
+
+});
+
+app.get('/dir/*', loggedInGuard ,function(req, res) {
+  console.log('________________________________');
+  //console.log('req.query', req.query);
+  //console.log('req.params', req.params);
+
+  dropboxClient.readdir('/' + req.params , function(error, entries) {
+    if (error) {
+      return error;
+    }
+
+    var directoryObject = {};
+    var allGotten = Q.defer();
+    var entriesCount = 0;
+    entries.forEach(function(entry) {
+      console.log('%%%%%%%%%%%', req.params);
+      var item = req.params + '/' + entry;
+      console.log(item);
+      dropboxClient.metadata(item,  {} ,function(err, data) {
+        if (err) { console.log(err); }
+        console.log('the data: ' ,data);
+        directoryObject[item] = data;
+        entriesCount++;
+        if (entriesCount === entries.length) {
+          allGotten.resolve();
+        }
+      });
+    });
+    Q.when(allGotten.promise).then(function() {
+      console.log('***********************************');
+      console.log('directory object', directoryObject);
+      res.end(JSON.stringify(directoryObject));
+    });
+  });
+
+});
+
+
 
 
 
