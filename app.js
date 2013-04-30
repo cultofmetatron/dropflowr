@@ -167,7 +167,7 @@ app.get('/file/*', loggedInGuard, function(req, res) {
 });
 
 
-app.get('/sdir', loggedInGuard, function(req, res) {
+app.get('/sdir/*', loggedInGuard, function(req, res) {
   dropboxClient.readdir('/' + req.params , function(error, entries) {
     if (error) {
       console.log(error);
@@ -178,7 +178,8 @@ app.get('/sdir', loggedInGuard, function(req, res) {
 });
 
 var getDirectoryInfo = function(req, res) {
-  dropboxClient.readdir('/' + req.params , function(error, entries) {
+  console.log(req.params);
+  dropboxClient.readdir( '/' + req.params , function(error, entries) {
     if (error) {
       return error;
     }
@@ -189,11 +190,12 @@ var getDirectoryInfo = function(req, res) {
     if (entries instanceof Array) {
       entries.forEach(function(entry) {
         var item = req.params + '/' + entry;
-        console.log(item);
+        console.log('item' + item);
         dropboxClient.metadata(item,  {} ,function(err, data) {
           if (err) { console.log(err); }
-          console.log('the data: ' ,data);
-          directoryObject[item] = data._json;
+          if (data && data._json) {
+            directoryObject[item] = data._json;
+          }
           entriesCount++;
           if (entriesCount === entries.length) {
             allGotten.resolve();
@@ -204,7 +206,8 @@ var getDirectoryInfo = function(req, res) {
       allGotten.resolve();
     }
     Q.when(allGotten.promise).then(function() {
-      console.log('directory object', directoryObject);
+      console.log('directory object', JSON.stringify(directoryObject));
+
       res.end(JSON.stringify(directoryObject));
     });
   });
