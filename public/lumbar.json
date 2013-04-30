@@ -5,6 +5,22 @@
     "config/base.json"
   ],
   "modules": {
+    "disco": {
+      "routes": {
+        "": "index"
+      },
+      "scripts": [
+        "js/routers/disco.js",
+        "js/views/disco/index.js",
+        "js/models/disco/song.js",
+        "js/collections/disco/playlist.js",
+        "js/views/disco/login.js",
+        "js/models/disco/dbfile.js"
+      ],
+      "styles": [
+        "stylesheets/disco.css"
+      ]
+    }
   },
   "templates": {
     "js/init.js": [

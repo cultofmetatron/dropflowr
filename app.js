@@ -17,7 +17,7 @@ var ROOT = __dirname + '';
 
 var app = express();
 
-everyauth.debug = true;
+everyauth.debug = false;
 //mongodb database
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/disco1');
@@ -61,7 +61,10 @@ var loggedInGuard = function(req, res, next) {
       next();
     } else {
       //TODO create json response to failed login
-
+      req.end(JSON.stringify({
+        error: "login failure",
+        loggedIn: false
+      }));
     }
   }
 };
@@ -84,8 +87,8 @@ app.use(express.methodOverride());
 app.use(everyauth.middleware(app));
 app.use(dropboxObject);
 //app.use(express.session({ secret: 'htuayreve', store: MemStore({reapInterval: 60000 * 10})}));
-app.use(require('less-middleware')({ src: __dirname + '/public' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(require('less-middleware')({ src: __dirname + '/public' + '/public' }));
+app.use(express.static(path.join(__dirname, 'public' , 'public')));
 
 app.use(app.router);
 
@@ -102,7 +105,8 @@ app.get('/', loggedInGuard ,function(req, res) {
   res.redirect('/public');
 });
 
-app.get('/public', loggedInGuard ,function(req, res) {
+
+var handleRootRoute = function(req, res) {
   console.log('########### req.route', req.route);
   console.log('req.user', req.user);
   //(req.session.auth) ? console.log('req.auth', req.session.auth.dropbox.loggedIn): null;
@@ -112,12 +116,34 @@ app.get('/public', loggedInGuard ,function(req, res) {
     everyuser : (function() { return (req.user) ? req.user.display_name : "log in"; })()
   });
 
-});
+};
+
+app.get('/public', loggedInGuard , handleRootRoute);
 
 app.get('/login', function(req, res) {
-  res.render('login', {});
+  if (req.xhr) {
+    if (req.user) {
+      //user is logged in
+      req.end(JSON.stringify({ loggedin:true }));
+    } else {
+      res.end(JSON.stringify({loggedIn:false}));
+    }
+  } else {
+    res.render('login', {});
+  }
 });
 
+app.get('/dropboxinfo', loggedInGuard, function(req, res) {
+   var accessToken = req.session.dropboxTokens.accessToken;
+   var accessSecret = req.session.dropboxTokens.accessSecret;
+   var key = config.db_encodedKey;
+
+   res.write(JSON.stringify({
+     accessToken : accessToken,
+     accessSecret: accessSecret,
+     key         : key
+   }));
+});
 
 //the dropbox file access directives
 
@@ -140,6 +166,17 @@ app.get('/file/*', loggedInGuard, function(req, res) {
   });
 });
 
+
+app.get('/sdir', loggedInGuard, function(req, res) {
+  dropboxClient.readdir('/' + req.params , function(error, entries) {
+    if (error) {
+      console.log(error);
+      res.end(JSON.stringify({ error: error }));
+    }
+    res.end(JSON.stringify(entries));
+  });
+});
+
 var getDirectoryInfo = function(req, res) {
   dropboxClient.readdir('/' + req.params , function(error, entries) {
     if (error) {
@@ -149,20 +186,23 @@ var getDirectoryInfo = function(req, res) {
     var directoryObject = {};
     var allGotten = Q.defer();
     var entriesCount = 0;
-    entries.forEach(function(entry) {
-      console.log('%%%%%%%%%%%', req.params);
-      var item = req.params + '/' + entry;
-      console.log(item);
-      dropboxClient.metadata(item,  {} ,function(err, data) {
-        if (err) { console.log(err); }
-        console.log('the data: ' ,data);
-        directoryObject[item] = data._json;
-        entriesCount++;
-        if (entriesCount === entries.length) {
-          allGotten.resolve();
-        }
+    if (entries instanceof Array) {
+      entries.forEach(function(entry) {
+        var item = req.params + '/' + entry;
+        console.log(item);
+        dropboxClient.metadata(item,  {} ,function(err, data) {
+          if (err) { console.log(err); }
+          console.log('the data: ' ,data);
+          directoryObject[item] = data._json;
+          entriesCount++;
+          if (entriesCount === entries.length) {
+            allGotten.resolve();
+          }
+        });
       });
-    });
+    } else {
+      allGotten.resolve();
+    }
     Q.when(allGotten.promise).then(function() {
       console.log('directory object', directoryObject);
       res.end(JSON.stringify(directoryObject));

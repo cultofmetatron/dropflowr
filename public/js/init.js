@@ -10,7 +10,7 @@ Application.templates = Thorax.templates;
 Application.Views = Thorax.Views;
 Application.Models = Thorax.Models;
 Application.Collections = Thorax.Collections;
-
+Application.DropboxClient = null;
 // Allows load:end and load:start events to propagate
 // to the application object
 Thorax.setRootObject(Application);
