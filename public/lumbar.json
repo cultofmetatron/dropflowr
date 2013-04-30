@@ -1,75 +1,66 @@
 {
-  "name": "thorax",
-
-  "mixins": {
-    "thorax-dep-jquery": {
+  "application": {
+    "name": "Application",
+    "module": "base"
+  },
+  "mixins": [
+    "node_modules/lumbar-loader",
+    "node_modules/thorax"
+  ],
+  "modules": {
+    "base": {
+      "mixins": [
+        "thorax-dep-jquery",
+        "thorax",
+        "thorax-helper-tags",
+        "thorax-loading",
+        "thorax-ie",
+        "lumbar-loader"
+      ],
       "scripts": [
-        {"src": "lib/jquery.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/handlebars.js", "global": true, "ignoreWarnings": true},
+        "node_modules/lumbar-loader/lumbar-loader-backbone.js",
+        "js/init.js",
+        "js/model.js",
+        "js/collection.js",
+        "js/view.js",
+        {
+          "module-map": true
+        },
+        "js/lib/bootstrap.js"
+      ],
+      "styles": [
+        "stylesheets/base.css",
+        "stylesheets/bootstrap.css"
       ]
     },
-    "thorax-dep-zepto": {
+    "disco": {
+      "routes": {
+        "": "index",
+        "login": "login"
+      },
       "scripts": [
-        {"src": "lib/zepto.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/handlebars.runtime.js", "global": true, "ignoreWarnings": true},
-      ]
-    },
-
-    "thorax": {
-      "scripts": [
-        {"src": "src/thorax.js"},
-        {"src": "src/util.js"},
-        {"src": "src/mixin.js"},
-        {"src": "src/event.js"},
-        {"src": "src/helper-view.js"},
-        {"src": "src/data-object.js"},
-        {"src": "src/model.js"},
-        {"src": "src/collection.js"},
-        {"src": "src/form.js"},
-        {"src": "src/layout.js"},
-        {"src": "src/router.js"},
-        {"src": "src/helpers/collection.js"},
-        {"src": "src/helpers/empty.js"},
-        {"src": "src/helpers/template.js"},
-        {"src": "src/helpers/url.js"},
-        {"src": "src/helpers/view.js"},
-      ]
-    },
-
-    "thorax-ie": {
-      "scripts": [
-        {"src": "src/ie.js"}
-      ]
-    },
-
-    "thorax-helper-tags": {
-      "scripts": [
-        {"src": "src/helpers/button-link.js"},
-        {"src": "src/helpers/element.js"},
-        {"src": "src/helpers/super.js"},
-      ]
-    },
-
-    "thorax-loading": {
-      "scripts": [
-        {"src": "src/loading.js"},
-        {"src": "src/helpers/loading.js"}
-      ]
-    },
-
-    "thorax-mobile": {
-      "scripts": [
-        {"src": "src/mobile.js"},
-        {"src": "src/mobile/tap-highlight.js"}
+        "js/routers/disco.js",
+        "js/views/disco/index.js",
+        "js/views/disco/login.js",
+        "js/models/disco/song.js",
+        "js/collections/disco/playlist.js"
+      ],
+      "styles": [
+        "stylesheets/disco.css"
       ]
     }
   },
-
   "templates": {
-    "template": "Thorax.templates['{{{without-extension name}}}'] = {{handlebarsCall}}({{{data}}});"
+    "root": "templates/",
+    "auto-include": {
+      "js/views/(.*)\\.(js|coffee)": [
+        "templates/$1.handlebars",
+        "templates/$1-item.handlebars",
+        "templates/$1-empty.handlebars"
+      ]
+    },
+    "js/init.js": [
+      "templates/application.handlebars"
+    ]
   }
 }

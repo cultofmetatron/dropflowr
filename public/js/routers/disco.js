@@ -1,10 +1,19 @@
 new (Backbone.Router.extend({
   routes: module.routes,
-  index : function() {
-    //load the songs in here
-    //var songs = new Application.Collection();
+  isloggedin: function() {
 
-    var view = new Application.Views["disco/index"]({});
+
+  },
+  index: function() {
+    var view = new Application.Views['disco/index']({});
+    Application.setView(view);
+
+  },
+
+  login: function() {
+    var view = new Application.Views['disco/login']({});
     Application.setView(view);
   }
+
+
 }));

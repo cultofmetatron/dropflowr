@@ -5,12 +5,12 @@ var Application = window.Application = new Thorax.LayoutView({
   name: 'application'
 });
 
-// Alias the special hashes for naming consitency
+// Alias the special hashes for naming consistency
 Application.templates = Thorax.templates;
 Application.Views = Thorax.Views;
 Application.Models = Thorax.Models;
 Application.Collections = Thorax.Collections;
-Application.DropboxClient = null;
+
 // Allows load:end and load:start events to propagate
 // to the application object
 Thorax.setRootObject(Application);
@@ -25,6 +25,9 @@ $(function() {
     root: '/',
     silent: true
   });
+  // TODO: can remove after this is fixed:
+  // https://github.com/walmartlabs/lumbar/issues/84
+  Application.template = Thorax.templates.application;
   Application.appendTo('body');
   Backbone.history.loadUrl();
 });
