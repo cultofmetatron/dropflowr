@@ -7,6 +7,7 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
+//var stream = require('stream');
 var querystring = require('querystring');
 var Q    = require('q');
 var everyauth = require('everyauth');
@@ -124,9 +125,9 @@ app.get('/login', function(req, res) {
   if (req.xhr) {
     if (req.user) {
       //user is logged in
-      req.end(JSON.stringify({ loggedin:true }));
+      res.end(JSON.stringify({ loggedin:true }));
     } else {
-      res.end(JSON.stringify({loggedIn:false}));
+      res.end(JSON.stringify({loggedin:false}));
     }
   } else {
     res.render('login', {});
@@ -136,9 +137,9 @@ app.get('/login', function(req, res) {
 app.get('/dropboxinfo', loggedInGuard, function(req, res) {
    var accessToken = req.session.dropboxTokens.accessToken;
    var accessSecret = req.session.dropboxTokens.accessSecret;
-   var key = config.db_encodedKey;
+   var key = configs.db_encodedKey;
 
-   res.write(JSON.stringify({
+   res.end(JSON.stringify({
      accessToken : accessToken,
      accessSecret: accessSecret,
      key         : key
@@ -164,6 +165,33 @@ app.get('/file/*', loggedInGuard, function(req, res) {
     output[filePath] = data._json;
     res.end(JSON.stringify(output));
   });
+});
+
+
+app.get('/dfile/*', loggedInGuard, function(req, res) {
+  res.attachment(filePath);
+  res.type('application/pdf');
+  var filePath = '/' + req.params;
+  var file = dropboxClient.getFile(filePath);
+  var dfile = new stream.Readable();
+  res.write(file, 'binary');
+  file.on('data', function(data) {
+    res.write(file, 'binary');
+  });
+  file.on('end', function(data) {
+    res.end(file, 'binary');
+
+  });
+
+
+
+  //file.pipe(dfile);
+  //file.on('data' , function(data) {
+
+  //});
+  //file.on('end', function(daa) {
+    //res.end(data);
+  //});
 });
 
 

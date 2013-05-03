@@ -20,6 +20,7 @@
       "scripts": [
         "node_modules/lumbar-loader/lumbar-loader-backbone.js",
         "js/init.js",
+        "js/sessionhandler.js",
         "js/model.js",
         "js/collection.js",
         "js/view.js",
@@ -36,14 +37,18 @@
     "disco": {
       "routes": {
         "": "index",
-        "login": "login"
+        "login": "login",
+        "playlist": "playlist"
       },
       "scripts": [
         "js/routers/disco.js",
         "js/views/disco/index.js",
         "js/views/disco/login.js",
         "js/models/disco/song.js",
-        "js/collections/disco/playlist.js"
+        "js/collections/disco/playlist.js",
+        "js/views/disco/playlist.js",
+        "js/views/disco/player.js",
+        "js/views/disco/ls.js"
       ],
       "styles": [
         "stylesheets/disco.css"

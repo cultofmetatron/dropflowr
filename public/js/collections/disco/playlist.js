@@ -1,22 +1,19 @@
 Application.Collection.extend({
   name: "disco/playlist",
   collection: Application['disco/song'],
-  loadSongs: function() {
+  loadSongs: function(directory) {
     var self = this;
-    var promise = $.get(self.dir, function(data) {
-      //console.log(data);
-      var songs = JSON.parse(data);
-
+    Application.dropbox.readdir(directory, {}, function(err, data) {
+      var songs = data;
       songs.forEach(function(song) {
-        //create a song model and add it to the collection
-        var songModel = new Application.Models['disco/song']({
+         var songModel = new Application.Models['disco/song']({
           filename: song,
-          filepath: self.dir + '/' + song
+          pathname: directory + '/'
         });
+        songModel.loadData();
         self.push(songModel);
       });
     });
-    return promise;
   }
 });
 
