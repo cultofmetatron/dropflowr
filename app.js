@@ -26,6 +26,7 @@ mongoose.connect('mongodb://localhost/disco1');
 //declare our models
 var DropboxUser = require('./models/user.js')(mongoose);
 
+
 //get dropbox data on every request cyclen if logged in
 var dropboxObject = function(req, res, next) {
   if (req.user) {
