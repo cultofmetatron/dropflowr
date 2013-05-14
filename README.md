@@ -1,4 +1,4 @@
-dbmusic-player
+Dropflowr
 ==============
 
-simple dropbox music player
+dropbox analytics
