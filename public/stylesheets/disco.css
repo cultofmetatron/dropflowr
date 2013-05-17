@@ -1,0 +1,40 @@
+body {
+  background-color: white;
+
+}
+
+div.container.bigview {
+  margin-top: 40px;
+}
+
+
+body {
+  background: url('/img/blue-background.png') white;
+
+}
+
+.navbar-inverse .navbar-inner {
+  background: url('/img/wood-light-background.jpg');
+  border-bottom: none;
+}
+
+.navbar-inverse .brand, .navbar-inverse .nav > li > a{
+  color: #633D22;
+  font-size: 18px;
+}
+
+.navbar-inverse .brand, .navbar-inverse .nav > li > a:hover {
+  color: #4D635E;
+}
+
+.navbar-inverse .brand, .navbar-inverse .nav > li > a.logo {
+  color:  #633D22;
+  font-size: 20px;
+
+}
+
+.navbar-inverse .brand, .navbar-inverse .nav > li > a.logo:hover {
+  /*color: #4D635E;*/
+}
+
+
