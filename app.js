@@ -89,8 +89,13 @@ app.use(express.methodOverride());
 app.use(everyauth.middleware(app));
 app.use(dropboxObject);
 //app.use(express.session({ secret: 'htuayreve', store: MemStore({reapInterval: 60000 * 10})}));
-app.use(require('less-middleware')({ src: __dirname + '/public'}));
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(require('less-middleware')({ src: __dirname + '/public'}));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+//app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 app.use(app.router);
 
@@ -104,7 +109,8 @@ if ('development' == app.get('env')) {
 
 // we redirect the user to /public where we can load the rich client
 app.get('/', loggedInGuard ,function(req, res) {
-  res.redirect('/public');
+  res.type('html');
+  res.sendfile(path.join(ROOT, 'public', 'index.html'));
 });
 
 
@@ -120,8 +126,6 @@ var handleRootRoute = function(req, res) {
 
 };
 
-app.get('/public', loggedInGuard , handleRootRoute);
-
 app.get('/login', function(req, res) {
   if (req.xhr) {
     if (req.user) {
@@ -132,6 +136,15 @@ app.get('/login', function(req, res) {
     }
   } else {
     res.render('login', {});
+  }
+});
+
+//return a 200 ok if good, 400 not so ok, if not
+app.get('/account/authenticated', function(req, res) {
+  if (req.user) {
+    res.send(200);
+  } else {
+    res.send(400);
   }
 });
 
@@ -241,67 +254,6 @@ var getDirectoryInfo = function(req, res) {
     });
   });
 };
-
-app.get('/dir/*', loggedInGuard , getDirectoryInfo );
-
-  /*
-  //yes, it returns a value!
-  console.log(req.params);
-  var param = '/' + req.params.join('');
-  var DObject = {};
-  var deff;
-  var item = directoryEach( param, function(entry, dData, resol) {
-    console.log('######  ', dData);
-    var directory = req.params.join('/') + '/' + entry;
-    console.log(param);
-    dropboxClient.metadata(param, function(err, data) {
-      if (err) { console.log(err); }
-      //console.log(data);
-      DObject[path] = data;
-      console.log('ddata: ', dData);
-      deff = resol.promise;
-    });
-  });
-  console.log('item: ', item.promise);
-  Q.when(deff).then(function() {
-    res.end(JSON.stringify(DObject));
-  });
-  */
-
-
-  /*
-  console.log('________________________________');
-  //console.log('req.query', req.query);
-  //console.log('req.params', req.params);
-  dropboxClient.readdir('/' + req.params , function(error, entries) {
-    if (error) {
-      return error;
-    }
-
-    var directoryObject = {};
-    var allGotten = Q.defer();
-    var entriesCount = 0;
-    entries.forEach(function(entry) {
-      console.log('%%%%%%%%%%%', req.params);
-      var item = req.params + '/' + entry;
-      console.log(item);
-      dropboxClient.metadata(item,  {} ,function(err, data) {
-        if (err) { console.log(err); }
-        console.log('the data: ' ,data);
-        directoryObject[item] = data;
-        entriesCount++;
-        if (entriesCount === entries.length) {
-          allGotten.resolve();
-        }
-      });
-    });
-    Q.when(allGotten.promise).then(function() {
-      console.log('***********************************');
-      console.log('directory object', directoryObject);
-      res.end(JSON.stringify(directoryObject));
-    });
-  });
-  */
 
 //takes a route, and callback and funs through it all
 var directoryEach = function(directory, callback) {
