@@ -89,8 +89,8 @@ app.use(express.methodOverride());
 app.use(everyauth.middleware(app));
 app.use(dropboxObject);
 //app.use(express.session({ secret: 'htuayreve', store: MemStore({reapInterval: 60000 * 10})}));
-app.use(require('less-middleware')({ src: __dirname + '/public' + '/public' }));
-app.use(express.static(path.join(__dirname, 'public' , 'public')));
+app.use(require('less-middleware')({ src: __dirname + '/public'}));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(app.router);
 
