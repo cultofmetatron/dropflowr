@@ -104,9 +104,6 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-
-
-
 // we redirect the user to /public where we can load the rich client
 app.get('/', loggedInGuard ,function(req, res) {
   res.type('html');

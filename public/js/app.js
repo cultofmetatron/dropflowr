@@ -1,33 +1,38 @@
+
 App = Ember.Application.create({
   ready: function() {
     var self = this;
     //set up dropbox object
-    $.ajax('/dropboxinfo', {
+  }
+});
+App.pending = {};
+
+//download the dropbox object;
+(function() {
+  var showtime = $.Deferred();
+  var self = this;
+  $.ajax('/dropboxinfo', {
       dataType: 'json',
       success: function(data) {
         console.log(data);
         self.dropboxClient = new Dropbox.Client({
           key: data.key,
           token: data.accessToken,
-          tokenSecret: data.accessSecret,
-          sandbox: true
+          tokenSecret: data.accessSecret
         });
-
+        showtime.resolve();
       },
       error: function(error) {
         console.log('there was an error');
+        showtime.resolve();
       }
-
-
-    });
-  }
-});
-//download the dropbox object;
-
+  });
+  App.pending['dropbox'] = showtime.done;
+}).call(App);
 
 App.Router.map(function() {
   // put your routes here
-  this.route('dir', {path: '/dir/:directory'});
+  this.route('dbox', {path: '/dbox'});
 });
 
 App.IndexRoute = Ember.Route.extend({
@@ -35,8 +40,6 @@ App.IndexRoute = Ember.Route.extend({
     return ['red', 'yellow', 'blue'];
   }
 });
-
-
 //helpers
 
 
