@@ -1,35 +1,33 @@
-
-App = Ember.Application.create({
-  ready: function() {
-    var self = this;
-    //set up dropbox object
-  }
-});
-App.pending = {};
-
-//download the dropbox object;
+// the application file
+//load the handlebars templates
+window.Templates = {};
 (function() {
-  var showtime = $.Deferred();
-  var self = this;
-  $.ajax('/dropboxinfo', {
-    dataType: 'json',
-    success: function(data) {
-      console.log(data);
-      self.dropboxClient = new Dropbox.Client({
-        key: data.key,
-        token: data.accessToken,
-        tokenSecret: data.accessSecret
-      });
-      showtime.resolve();
-      showtime.resolveWith(self, self.dropboxClient);
-    },
-    error: function(error) {
-      console.log('there was an error');
-      showtime.resolve();
-    }
+  var sources = $('script[type="text/x-handlebars-template"]');
+  sources.each(function(index, item) {
+    var node = $(item);
+    window.Templates[node.data('template-name')] = Handlebars.compile(node.html());
   });
-  App.pending['dropbox'] = showtime.done;
-}).call(App);
-//helpers
+}).call(this);
+
+
+window.App = Backbone.Model.extend({});
+
+window.app = new App();
+
+window.Views.App = Backbone.View.extend({
+  tagName: 'div',
+  template: window.Templates.application,
+  render: function() {
+    $('body').append(this.template());
+  }
+
+});
+
+window.appView = new AppView({
+  model: app
+});
+
+
+
 
 

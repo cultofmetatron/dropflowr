@@ -1,28 +1,4 @@
-/* Put your CSS here */
-html, body {
-    margin: 40px;
-}
 
-#top-navigation a.brand {
-  float: right;
+body {
 
 }
-
-.dip {
-  margin-top: 40px;
-}
-
-div#visual {
-  width: 100%;
-  border: 1px solid black;
-  height: 100%;
-  min-height: 550px;
-
-}
-
-.outline {
-  border: 1px solid black;
-
-}
-
-
