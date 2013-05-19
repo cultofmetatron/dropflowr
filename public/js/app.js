@@ -15,9 +15,40 @@ window.Templates = {};
 
 }).call(this);
 
-window.App = Backbone.Model.extend({});
+window.App = Backbone.Model.extend({
+  defaults: {
+    pending: []
+
+  }
+});
 
 window.app = new App();
+
+(function() {
+  var showtime = $.Deferred();
+  var self = this;
+  $.ajax('/dropboxinfo', {
+    dataType: 'json',
+    success: function(data) {
+      console.log(data);
+      self.set('dropboxClient' , new Dropbox.Client({
+        key: data.key,
+        token: data.accessToken,
+        tokenSecret: data.accessSecret
+      }));
+      showtime.resolve();
+      showtime.resolveWith(self, self.get('dropboxClient'));
+    },
+    error: function(error) {
+      console.log('there was an error');
+      showtime.resolve();
+    }
+  });
+  self.get('pending')['dropbox'] = showtime.done;
+}).call(app);
+
+
+
 
 //create out submodels
 window.DropboxModel = Backbone.Model.extend({
@@ -44,9 +75,6 @@ window.AppView = Backbone.View.extend({
 window.appView = new AppView({
   model: app
 });
-
-//kickstart the view rendering
-appView.render();
 
 
 
