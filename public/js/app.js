@@ -21,6 +21,7 @@ App.pending = {};
         tokenSecret: data.accessSecret
       });
       showtime.resolve();
+      showtime.resolveWith(self, self.dropboxClient);
     },
     error: function(error) {
       console.log('there was an error');
@@ -29,17 +30,6 @@ App.pending = {};
   });
   App.pending['dropbox'] = showtime.done;
 }).call(App);
-
-App.Router.map(function() {
-  // put your routes here
-  this.route('directory', {path: '/directory'});
-});
-
-App.IndexRoute = Ember.Route.extend({
-  model: function() {
-    return ['red', 'yellow', 'blue'];
-  }
-});
 //helpers
 
 

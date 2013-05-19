@@ -1,10 +1,13 @@
 //controllers
 
 App.DirectoryController = Ember.ObjectController.extend({
-  directoryTree : App.Models.Directory.create()
+  size: (function() {
+    console.log(this.get('content.foo'));
+    return this.get('content.foo');
+
+  }).property('content.foo')
 });
 
-App.dbox = App.DirectoryController.create();
 
 
 

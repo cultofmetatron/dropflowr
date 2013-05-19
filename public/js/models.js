@@ -51,8 +51,11 @@ App.Models.Files = {};
 
 
 //model that the Directory controller uses
-App.Models.Directory = Ember.Object.extend({
-  rootDir : App.Models.Files['/'] || (App.Models.Files['/'] = App.Models.File.create({path: '/'}))
+App.Directory = Ember.Object.extend({
+  rootDir : function() {
+    return App.Models.File.create({path: '/'})
+  },
+  foo: "hello all the world"
 });
 
 
