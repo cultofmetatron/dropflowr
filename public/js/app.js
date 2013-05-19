@@ -12,27 +12,27 @@ App.pending = {};
   var showtime = $.Deferred();
   var self = this;
   $.ajax('/dropboxinfo', {
-      dataType: 'json',
-      success: function(data) {
-        console.log(data);
-        self.dropboxClient = new Dropbox.Client({
-          key: data.key,
-          token: data.accessToken,
-          tokenSecret: data.accessSecret
-        });
-        showtime.resolve();
-      },
-      error: function(error) {
-        console.log('there was an error');
-        showtime.resolve();
-      }
+    dataType: 'json',
+    success: function(data) {
+      console.log(data);
+      self.dropboxClient = new Dropbox.Client({
+        key: data.key,
+        token: data.accessToken,
+        tokenSecret: data.accessSecret
+      });
+      showtime.resolve();
+    },
+    error: function(error) {
+      console.log('there was an error');
+      showtime.resolve();
+    }
   });
   App.pending['dropbox'] = showtime.done;
 }).call(App);
 
 App.Router.map(function() {
   // put your routes here
-  this.route('dbox', {path: '/dbox'});
+  this.route('directory', {path: '/directory'});
 });
 
 App.IndexRoute = Ember.Route.extend({

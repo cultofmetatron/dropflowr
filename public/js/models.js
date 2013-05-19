@@ -9,9 +9,19 @@ App.Models.File = Ember.Object.extend({
     App.dropboxClient.readdir(self.path, function(error, entries) {
       if (error) { console.log('error: ' + error); }
       entries.forEach(function(entry) {
-        self.contents[entry] = self.path + entry;
+        self.contents[entry] = { path: self.path + entry };
       });
     });
+  },
+  fetchContents: function() {
+    var self = this;
+    if (self.directory) {
+      for (var subitem in self.contents) {
+        self.contents[subitem].node = App.Models.Files[self.contents[subitem].path] = App.Models.File.create({
+          path: self.contents[subitem].path
+        });
+      }
+    }
   },
   getInfo: function() {
     var self = this;
@@ -35,6 +45,13 @@ App.Models.File = Ember.Object.extend({
 });
 //the apps Files
 App.Models.Files = {};
+
+
+//model that the Directory controller uses
+App.Models.Directory = Ember.Object.extend({
+  rootDir : App.Models.Files['/'] || (App.Models.Files['/'] = App.Models.File.create({path: '/'}))
+});
+
 
 //App.Models.Files['root'] = App.Models.File.create({path: '/'});
 

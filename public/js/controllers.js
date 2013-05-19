@@ -1,7 +1,7 @@
 //controllers
 
 App.DirectoryController = Ember.ObjectController.extend({
-  root : App.Models.Files['/'] || (App.Models.Files['/'] = App.Models.File.create({path: '/'}))
+  directoryTree : App.Models.Directory.create()
 });
 
 App.dbox = App.DirectoryController.create();
