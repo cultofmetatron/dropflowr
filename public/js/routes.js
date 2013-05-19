@@ -19,7 +19,7 @@ App.DirectoryRoute = Ember.Route.extend({
     this.render('directory', { controller: 'directory' });
   },
   setupController: function(controller, model) {
-    controller.set('content', App.Directory.create());
+    controller.set('content', App.Directories.main );
   }
 });
 
