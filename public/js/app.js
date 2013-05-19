@@ -5,20 +5,38 @@ window.Templates = {};
   var sources = $('script[type="text/x-handlebars-template"]');
   sources.each(function(index, item) {
     var node = $(item);
-    window.Templates[node.data('template-name')] = Handlebars.compile(node.html());
+    if (node.data('template-name').match(/^_/)) {
+      //its a partial
+      Handlebars.registerPartial((node.data('template-name')).slice(1), Handlebars.compile(node.html()));
+    } else {
+      window.Templates[node.data('template-name')] = Handlebars.compile(node.html());
+    }
   });
-}).call(this);
 
+}).call(this);
 
 window.App = Backbone.Model.extend({});
 
 window.app = new App();
 
-window.Views.App = Backbone.View.extend({
+//create out submodels
+window.DropboxModel = Backbone.Model.extend({
+
+
+
+});
+
+
+
+window.AppView = Backbone.View.extend({
   tagName: 'div',
   template: window.Templates.application,
   render: function() {
-    $('body').append(this.template());
+    var self = this;
+    context = {
+
+    };
+    $('body > div#entry-point').html(self.template(context));
   }
 
 });
@@ -27,6 +45,8 @@ window.appView = new AppView({
   model: app
 });
 
+//kickstart the view rendering
+appView.render();
 
 
 

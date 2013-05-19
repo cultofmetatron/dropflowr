@@ -9,11 +9,30 @@
 
 </head>
 <body>
-
+  <div id="entry-point"></div>
 
   <script type="text/x-handlebars-template" data-template-name="application">
+    {{> navtop}}
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          {{> sidebar}}
+        </div>
+        <div class="span9">
+          {{> breadcrumbs }}
+          <div id="visual">
+            <p> nothing to see here yet </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
+  </script>
 
+  <script type="text/x-handlebars-template" data-template-name="_breadcrumbs">
+    <ul class="breadcrumb">
+      <li><a href="#" class="active">/</a> <span class="divider">/</span></li>
+    </ul>
   </script>
 
   <script type="text/x-handlebars-template" data-template-name="_navtop">
@@ -28,33 +47,8 @@
           <a class="brand" href="/">DropFlowr</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="/home">Home</a></li>
-              <li>{{#linkTo "directory"}}Dropbox{{/linkTo}}</li>
+
             </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </script>
-
-  <script type="text/x-handlebars-template" data-template-name="_loginhelper">
-
-  </script>
-
-  <script type="text/x-handlebars-template" data-template-name="directory">
-    <div class="container-fluid">
-      <div class="row-fluid">
-        <div class="span3">
-          {{partial sidebar}}
-        </div>
-        <div class="span9">
-          <ul class="breadcrumb">
-            <li><a href="#" class="active">/</a> <span class="divider">/</span></li>
-          </ul>
-          <h1>size: {{size}}</h1>
-          <div id="visual">
-
-            <p>hello</p>
           </div>
         </div>
       </div>
@@ -88,6 +82,8 @@
   <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+  <script src="/js/backbone.dropbox.js"></script>
+
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.2/handlebars.js"></script>
 
   <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.2/dropbox.js"></script>
