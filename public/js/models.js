@@ -12,8 +12,9 @@ App.Models.File = Ember.Object.extend({
         self.contents[entry] = { path: self.path + entry };
       });
     });
+    return self;
   },
-  fetchContents: function() {
+  fetchContents: function(options) {
     var self = this;
     if (self.directory) {
       for (var subitem in self.contents) {
@@ -22,6 +23,7 @@ App.Models.File = Ember.Object.extend({
         });
       }
     }
+    return self;
   },
   getInfo: function() {
     var self = this;
@@ -34,6 +36,7 @@ App.Models.File = Ember.Object.extend({
         self.directory = false;
       }
     });
+    return self;
   },
   init: function() {
     var self = this;
