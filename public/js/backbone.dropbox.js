@@ -33,18 +33,22 @@ remotes.pending = {};
   Models.File = Backbone.Model.extend({
     defaults: {
       path: '/',
-      pending: []
+      pending: [],
+      fetch: true
     },
     initialize: function() {
       var self = this;
-      remotes.pending['dropbox'](function(dropboxClient) {
-        self.getInfo();
-      });
+      if (!!this.fetch) {
+        remotes.pending['dropbox'](function(dropboxClient) {
+          self.getInfo();
+        });
+      }
     },
     getInfo: function() {
       var self = this;
       var defer = $.Deferred();
       remotes.dropboxClient.stat(self.get('path'), function(err, data) {
+        console.log(data)
         for (var key in data._json) {
           self.set(key, data._json[key]);
         }
@@ -61,19 +65,32 @@ remotes.pending = {};
     },
     getContents: function() {
       var self = this;
-      self.set('contents', {});
+      self.set('contents', new Models.FileCollection());
       var defer = $.Deferred();
       remotes.dropboxClient.readdir(self.get('path'), function(err, entries) {
         //now fetch the names of files it owns
         if (err) {console.log(err); return "error";}
         entries.forEach(function(entry) {
-          self.get('contents')[entry] = {
+
+          self.get('contents').push(
+            new Models.File({
+              path: (function() {
+                        //yea I know...
+                      return (this.get('path') === '/') ?  '/' + entry : this.get('path') + '/' + entry;
+                    }).call(self),
+              fetch: false
+            }));
+          /*
             path: (function() {
               //yea I know...
               return (this.get('path') === '/') ?  '/' + entry : this.get('path') + entry;
             }).call(self)
-          };
-          defer.resolve();
+            */
+
+        defer.resolve();
+
+
+
         });
       });
       self.get('pending').push(defer.promise());
