@@ -1,6 +1,8 @@
 // the application file
 //load the handlebars templates
 window.Templates = {};
+
+
 (function() {
   var sources = $('script[type="text/x-handlebars-template"]');
   sources.each(function(index, item) {
@@ -17,38 +19,17 @@ window.Templates = {};
 
 window.App = Backbone.Model.extend({
   defaults: {
-    pending: []
-
+    pending: [],
+    rootDir: new Models.File({}),
+    directories: []
+  },
+  initialize: function() {
+    this.get('directories').push("hello");
+    this.set('currentDir', this.get('rootDir'));
   }
 });
 
 window.app = new App();
-
-(function() {
-  var showtime = $.Deferred();
-  var self = this;
-  $.ajax('/dropboxinfo', {
-    dataType: 'json',
-    success: function(data) {
-      console.log(data);
-      self.set('dropboxClient' , new Dropbox.Client({
-        key: data.key,
-        token: data.accessToken,
-        tokenSecret: data.accessSecret
-      }));
-      showtime.resolve();
-      showtime.resolveWith(self, self.get('dropboxClient'));
-    },
-    error: function(error) {
-      console.log('there was an error');
-      showtime.resolve();
-    }
-  });
-  self.get('pending')['dropbox'] = showtime.done;
-}).call(app);
-
-
-
 
 //create out submodels
 window.DropboxModel = Backbone.Model.extend({
@@ -62,6 +43,13 @@ window.DropboxModel = Backbone.Model.extend({
 window.AppView = Backbone.View.extend({
   tagName: 'div',
   template: window.Templates.application,
+  initialize: function() {
+    this.model.on('change:currentDir', function() {
+      console.log(this);
+      console.log('it works!!');
+    }, this);
+
+  },
   render: function() {
     var self = this;
     context = {
@@ -72,10 +60,16 @@ window.AppView = Backbone.View.extend({
 
 });
 
-window.appView = new AppView({
-  model: app
-});
+$(document).ready(function() {
+  window.appView = new AppView({
+    model: app
+  });
 
+  //kickstart the view rendering
+  appView.render();
+
+
+});
 
 
 

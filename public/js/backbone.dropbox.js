@@ -1,16 +1,50 @@
+
+
+window.remotes = {};
+remotes.pending = {};
+
+(function() {
+  var showtime = $.Deferred();
+  var self = this;
+  $.ajax('/dropboxinfo', {
+    dataType: 'json',
+    success: function(data) {
+      console.log(data);
+      self.dropboxClient = new Dropbox.Client({
+        key: data.key,
+        token: data.accessToken,
+        tokenSecret: data.accessSecret
+      });
+      showtime.resolve();
+      showtime.resolveWith(self, self.dropboxClient);
+    },
+    error: function(error) {
+      console.log('there was an error');
+      showtime.resolve();
+    }
+  });
+  remotes.pending.dropbox = showtime.done;
+}).call(remotes);
+
+
 //backbone.dropbox
-(function(app) {
+(function() {
   window.Models = {};
   Models.File = Backbone.Model.extend({
     defaults: {
       path: '/',
       pending: []
-
+    },
+    initialize: function() {
+      var self = this;
+      remotes.pending['dropbox'](function(dropboxClient) {
+        self.getInfo();
+      });
     },
     getInfo: function() {
       var self = this;
       var defer = $.Deferred();
-      app.get('dropboxClient').stat(self.get('path'), function(err, data) {
+      remotes.dropboxClient.stat(self.get('path'), function(err, data) {
         for (var key in data._json) {
           self.set(key, data._json[key]);
         }
@@ -29,25 +63,61 @@
       var self = this;
       self.set('contents', {});
       var defer = $.Deferred();
-      app.get('dropboxClient').readdir(self.get('path'), function(err, entries) {
+      remotes.dropboxClient.readdir(self.get('path'), function(err, entries) {
         //now fetch the names of files it owns
-        if (error) {console.log(err); return "error";}
+        if (err) {console.log(err); return "error";}
         entries.forEach(function(entry) {
           self.get('contents')[entry] = {
-            path: self.get('path') + entry
+            path: (function() {
+              //yea I know...
+              return (this.get('path') === '/') ?  '/' + entry : this.get('path') + entry;
+            }).call(self)
           };
+          defer.resolve();
         });
       });
-    }
+      self.get('pending').push(defer.promise());
+    }/*,
+    getContentsInfo: function() {
+      //window.debg = {}
+      var self = this;
+      $.when.apply(this, this.get('pending')).done(function() {
+        if (self.get('isDirectory')) {
+          console.log('contents', self.get('contents'));
+          for (var key in self.get('contents')) {
+            var node = self.get('contents')[key].node = new Models.File({
+              path: self.get('contents')[key].path
+            });
+            //window.debg[node.path] = node
+            //window.setTimeout(function() {
+              $.when.apply(this, node.get('pending')).done(function() {
+                console.log('khaaaaaaan: ', self);
+                console.log(self.get('contents')[key].path);
+                console.log('node', node);
+                console.log('isDirectory exists?', node.get('isDirectory'));
+                node.getContentsInfo();
+              });
+            //}, 2000);
+          }
+        }
 
 
+      })
+
+    } */
   });
 
-}).call(this, app);
+  Models.FileCollection = Backbone.Collection.extend({
+    model: Models.File
+  });
+
+
+}).call(this);
 
 
 
-//kickstart the view rendering
-appView.render();
+//setup the paths
+
+
 
 
