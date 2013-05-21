@@ -23,7 +23,6 @@
         <div class="span9">
           {{> breadcrumbs }}
           <div id="visual">
-
             <p> nothing to see here yet </p>
           </div>
         </div>
@@ -71,6 +70,13 @@
 
   <script type="text/x-handlebars-template" data-template-name="sidebarFile">
     <p> #sidebarFile </p>
+    <span> size: {{size}}</span>
+    <span> size: {{path}}</span>
+    <ul class="nav nav-list">
+    {{#each contents}}
+      <li><a data-file="{{this.path}}" href="">{{this.name}}</a></li>
+    {{/each}}
+    </ul>
   </script>
 
 

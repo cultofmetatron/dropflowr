@@ -38,6 +38,7 @@ remotes.pending = {};
     },
     initialize: function() {
       var self = this;
+      console.log('fetching path :', self.path);
       if (!!this.fetch) {
         remotes.pending['dropbox'](function(dropboxClient) {
           var trigger = $.Deferred();
@@ -67,6 +68,9 @@ remotes.pending = {};
         } else {
           self.set('isDirectory', false);
         }
+        console.log('changing', self)
+        self.trigger('change');
+
       });
       self.get('pending').push(defer.promise());
       return self;
@@ -99,9 +103,11 @@ remotes.pending = {};
             */
 
         defer.resolve();
+        console.log('change we can believe in!!');
+        self.trigger('change');
+
         });
       });
-      console.log('loaded contents');
       self.get('pending').push(defer.promise());
     }
 
