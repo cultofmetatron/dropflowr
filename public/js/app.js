@@ -1,9 +1,9 @@
-// the application file
-//load the handlebars templates
-window.Templates = {};
-
 
 (function() {
+  // the index.html
+  //load the handlebars templates from the x-handlebars tags
+  //names starting with '_' is a partial
+  window.Templates = {};
   var sources = $('script[type="text/x-handlebars-template"]');
   sources.each(function(index, item) {
     var node = $(item);
@@ -18,6 +18,15 @@ window.Templates = {};
 
 window.App = Backbone.Model.extend({
   defaults: {
+    /* pending holds a list of promises generated from async calls to
+     * make successive async calls quee up after the current syncing is done
+     *
+     * Directories holds info on all previously fetched directory data so we don't have to
+     * hammer dropbox as much
+     *
+     * history holds a collection of reviously accessed hisories so we don't have to retrieve it
+     * later on. backbutton functionality comming later
+     */
     pending: [],
     rootDir: new Models.File({}),
     directories: new Models.FileCollection(),
@@ -41,11 +50,29 @@ window.App = Backbone.Model.extend({
   }
 });
 
+window.SidebarFileCollectionView = Backbone.View.extend({
+  collection: Models.FileCollection,
+  render: function() {
+
+
+  }
+});
 
 window.SidebarFileView = Backbone.View.extend({
   model: Models.File,
-  tagname: 'div'
+  tagname: 'div',
+  template: Templates.sidebarFile,
+  render: function() {
+    this.$el.addClass('well').addClass('sidebar-nav');
+    var context = {
+      path :       this.model.get('path'),
+      subfiles :   this.model.get('contents'),
+      isDirectory: this.model.get('isDirectory'),
+      size:        this.model.get('size')
 
+    };
+
+  }
 
 });
 
@@ -65,33 +92,20 @@ window.AppView = Backbone.View.extend({
     this.model.get("currentDir").on("change", this.render, this);
   },
   switchModel: function(){
+    //switches directories and binds listening to the new current directory so that we can
+    //continue persisting changes
     this.model.get("currentDir").on("change", this.render, this);
     this.model.on('change:currentDir', this.switchModel , this);
     this.render();
 
 
   },
-  listenCurrentDir: function() {
-
-
-  },
-  unlistenCurrentDir: function() {
-
-
-  },
   render: function() {
+
     var self = this;
-    console.log('this: ' , this);
-    console.log('the current drectory size', this.model.get('currentDir').attributes);
-    //debugger
-    context = {
-      path :       self.model.get('currentDir').get('path'),
-      subfiles :   self.model.get('currentDir').get('contents'),
-      isDirectory: self.model.get('currentDir').get('isDirectory'),
-      size:        self.model.get('currentDir').get('size'),
-      greeting: 'what? this works?'
-    };
-    $('body > div#entry-point').html(self.template(context));
+
+
+    $('body > div#entry-point').html(self.template());
   },
   redraw : function() {
 
