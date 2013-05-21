@@ -3,19 +3,41 @@
 <head>
 <meta charset="utf-8">
 <title>DropFlowr</title>
-  <link rel="stylesheet" href="/css/normalize.css">
+
+  <link rel="stylesheet" href="/css/bootstrap.css">
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
 
 </head>
 <body>
+  <div id="entry-point"></div>
 
-  <script type="text/x-handlebars">
-    {{partial "navtop"}}
-    {{outlet}}
+  <script type="text/x-handlebars-template" data-template-name="application">
+    {{> navtop}}
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div id="sidebar" class="span3">
+
+
+          <audio id="player" src="" controls>no audio for you</audio>
+        </div>
+        <div class="span9">
+          {{> breadcrumbs }}
+          <div id="visual">
+            <p> nothing to see here yet </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </script>
 
-   <script type="text/x-handlebars" data-template-name="_navtop">
+  <script type="text/x-handlebars-template" data-template-name="_breadcrumbs">
+    <ul class="breadcrumb">
+      <li><a href="#" class="active"></a> <span class="divider">/</span></li>
+    </ul>
+  </script>
+
+  <script type="text/x-handlebars-template" data-template-name="_navtop">
     <div id="top-navigation" class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -27,7 +49,7 @@
           <a class="brand" href="/">DropFlowr</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="/home">Home</a></li>
+
             </ul>
           </div>
         </div>
@@ -35,23 +57,54 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars" data-template-name="index">
+  <script type="text/x-handlebars-template" data-template-name="_sidebar">
+    <div class="well sidebar-nav">
+      <p>{{size}}</p>
+      <ul class="nav nav-list">
+        <li class="nav-header">Sidebar</li>
+        <li class="active"><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+        </ul>
+      </div><!--/.well -->
+  </script>
+
+  <script type="text/x-handlebars-template" data-template-name="sidebarFile">
+    <p> #sidebarFile </p>
+    <span> size: {{size}}</span>
+    <span> size: {{path}}</span>
+    <ul class="nav nav-list">
+    {{#each contents}}
+      <li><a data-file="{{this.path}}" href="">{{this.name}}</a></li>
+    {{/each}}
+    </ul>
+  </script>
+
+
+  <script type="text/x-handlebars-template" data-template-name="index">
     <div class="main jumbotron subhead">
       <div class="container">
         <h1>Dropflowr </h1>
-        <p class="lead">the best thing to hit dropbox since sliced bread</a>
+        <p class="lead">The best thing to hit dropbox since sliced bread</p>
 
       </div>
     </div>
+      <div class="container">
+
+      </div>
   </script>
 
-  <script src="/js/libs/jquery-1.9.1.js"></script>
+  <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.2/handlebars.js"></script>
+
   <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.2/dropbox.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.0.8/d3.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/js/libs/handlebars-1.0.0-rc.3.js"></script>
-  <script src="/js/libs/ember-1.0.0-rc.3.js"></script>
-  <script src="/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.0.8/d3.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.js" type="text/javascript"></script>
+  <script src="/js/backbone.dropbox.js"></script>
   <script src="/js/app.js"></script>
 
-</body>
+
+  </body>
 </html>
