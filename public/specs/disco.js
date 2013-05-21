@@ -1,3 +1,0 @@
-describe("disco", function() {
-  
-});
