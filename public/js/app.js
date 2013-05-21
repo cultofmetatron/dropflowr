@@ -14,30 +14,47 @@ window.Templates = {};
       window.Templates[node.data('template-name')] = Handlebars.compile(node.html());
     }
   });
-
 }).call(this);
 
 window.App = Backbone.Model.extend({
   defaults: {
     pending: [],
     rootDir: new Models.File({}),
-    directories: []
+    directories: new Models.FileCollection(),
+    history: new Models.FileCollection()
   },
   initialize: function() {
-    this.get('directories').push("hello");
+    this.get('directories').push(this.get('rootDir'));
     this.set('currentDir', this.get('rootDir'));
+  },
+  navigateTo: function(newDir) {
+    console.log("this: " , this, "app : ",  app);
+    console.log(this.get('history'));
+    console.log( this.get('history').push);
+    this.get('history').push(this.get('currentDir'));
+    var nextDir = this.get('directories').findByPath(newDir);
+    if (!nextDir) { //the directory has not been fetched yet
+      this.get('directories').push(new Models.File({path:newDir}));
+      nextDir = this.get('directories').findByPath(newDir);
+    }
+    this.set('currentDir', nextDir);
   }
 });
 
-window.app = new App();
 
-//create out submodels
-window.DropboxModel = Backbone.Model.extend({
-
+window.SidebarFileView = Backbone.View.extend({
+  model: Models.File,
+  tagname: 'div'
 
 
 });
 
+
+
+
+
+
+window.app = new App();
 
 
 window.AppView = Backbone.View.extend({
@@ -45,20 +62,31 @@ window.AppView = Backbone.View.extend({
   template: window.Templates.application,
   initialize: function() {
     this.model.on('change:currentDir', function() {
-      console.log(this);
+      console.log('grrrr', this);
       console.log('it works!!');
     }, this);
+
 
   },
   render: function() {
     var self = this;
     context = {
-
+      path :       self.model.get('currentDir').get('path'),
+      subfiles :   self.model.get('currentDir').get('contents'),
+      isDirectory: self.model.get('currentDir').get('isDirectory'),
+      size:        self.model.get('currentDir').get('size')
     };
     $('body > div#entry-point').html(self.template(context));
-  }
+  },
+  redraw : function() {
 
+
+  }
 });
+
+
+
+
 
 $(document).ready(function() {
   window.appView = new AppView({

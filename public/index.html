@@ -15,7 +15,7 @@
     {{> navtop}}
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span3">
+        <div id="sidebar" class="span3">
           {{> sidebar}}
         </div>
         <div class="span9">
@@ -31,7 +31,7 @@
 
   <script type="text/x-handlebars-template" data-template-name="_breadcrumbs">
     <ul class="breadcrumb">
-      <li><a href="#" class="active">/</a> <span class="divider">/</span></li>
+      <li><a href="#" class="active">{{path}}</a> <span class="divider">/</span></li>
     </ul>
   </script>
 
@@ -56,7 +56,7 @@
   </script>
 
   <script type="text/x-handlebars-template" data-template-name="_sidebar">
-      <div id="sidebar" class="well sidebar-nav">
+      <div class="well sidebar-nav">
         <ul class="nav nav-list">
           <li class="nav-header">Sidebar</li>
           <li class="active"><a href="#">Link</a></li>

@@ -44,11 +44,16 @@ remotes.pending = {};
         });
       }
     },
+    fetchFile: function(file) {
+      var obj = this.get('contents')[file];
+      obj.node = new Models.File(obj.path);
+      return obj.node;
+    },
     getInfo: function() {
       var self = this;
       var defer = $.Deferred();
       remotes.dropboxClient.stat(self.get('path'), function(err, data) {
-        console.log(data)
+        console.log(data);
         for (var key in data._json) {
           self.set(key, data._json[key]);
         }
@@ -65,21 +70,24 @@ remotes.pending = {};
     },
     getContents: function() {
       var self = this;
-      self.set('contents', new Models.FileCollection());
+      self.set('contents' , {});
       var defer = $.Deferred();
       remotes.dropboxClient.readdir(self.get('path'), function(err, entries) {
         //now fetch the names of files it owns
         if (err) {console.log(err); return "error";}
         entries.forEach(function(entry) {
 
-          self.get('contents').push(
-            new Models.File({
-              path: (function() {
+          self.get('contents')[entry] = {
+            name: entry,
+            path: (function() {
                         //yea I know...
                       return (this.get('path') === '/') ?  '/' + entry : this.get('path') + '/' + entry;
                     }).call(self),
-              fetch: false
-            }));
+            node: null
+
+          };
+
+
           /*
             path: (function() {
               //yea I know...
@@ -88,44 +96,21 @@ remotes.pending = {};
             */
 
         defer.resolve();
-
-
-
         });
       });
+      console.log('loaded contents');
       self.get('pending').push(defer.promise());
-    }/*,
-    getContentsInfo: function() {
-      //window.debg = {}
-      var self = this;
-      $.when.apply(this, this.get('pending')).done(function() {
-        if (self.get('isDirectory')) {
-          console.log('contents', self.get('contents'));
-          for (var key in self.get('contents')) {
-            var node = self.get('contents')[key].node = new Models.File({
-              path: self.get('contents')[key].path
-            });
-            //window.debg[node.path] = node
-            //window.setTimeout(function() {
-              $.when.apply(this, node.get('pending')).done(function() {
-                console.log('khaaaaaaan: ', self);
-                console.log(self.get('contents')[key].path);
-                console.log('node', node);
-                console.log('isDirectory exists?', node.get('isDirectory'));
-                node.getContentsInfo();
-              });
-            //}, 2000);
-          }
-        }
+    }
 
-
-      })
-
-    } */
   });
 
   Models.FileCollection = Backbone.Collection.extend({
-    model: Models.File
+    model: Models.File,
+    findByPath: function(path) {
+      return this.find(function(file) {
+        return file.get('path') === path;
+      });
+    }
   });
 
 
