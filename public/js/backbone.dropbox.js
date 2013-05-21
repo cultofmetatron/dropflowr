@@ -40,7 +40,9 @@ remotes.pending = {};
       var self = this;
       if (!!this.fetch) {
         remotes.pending['dropbox'](function(dropboxClient) {
-          self.getInfo();
+          var trigger = $.Deferred();
+          self.get('pending').push(trigger.promise());
+          self.getInfo(trigger);
         });
       }
     },
@@ -49,7 +51,7 @@ remotes.pending = {};
       obj.node = new Models.File(obj.path);
       return obj.node;
     },
-    getInfo: function() {
+    getInfo: function(defer) {
       var self = this;
       var defer = $.Deferred();
       remotes.dropboxClient.stat(self.get('path'), function(err, data) {
@@ -58,6 +60,7 @@ remotes.pending = {};
           self.set(key, data._json[key]);
         }
         defer.resolve( self.get('stats'));
+        (defer) ? defer.resolve() : null ;
         if (self.get('is_dir') === true) {
           self.set('isDirectory', true);
           self.getContents();

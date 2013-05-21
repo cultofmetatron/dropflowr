@@ -28,9 +28,6 @@ window.App = Backbone.Model.extend({
     this.set('currentDir', this.get('rootDir'));
   },
   navigateTo: function(newDir) {
-    console.log("this: " , this, "app : ",  app);
-    console.log(this.get('history'));
-    console.log( this.get('history').push);
     this.get('history').push(this.get('currentDir'));
     var nextDir = this.get('directories').findByPath(newDir);
     if (!nextDir) { //the directory has not been fetched yet
@@ -38,6 +35,9 @@ window.App = Backbone.Model.extend({
       nextDir = this.get('directories').findByPath(newDir);
     }
     this.set('currentDir', nextDir);
+  },
+  resetDir: function() {
+    this.navigateTo(this.get('rootDir').get('path'));
   }
 });
 
@@ -61,20 +61,35 @@ window.AppView = Backbone.View.extend({
   tagName: 'div',
   template: window.Templates.application,
   initialize: function() {
-    this.model.on('change:currentDir', function() {
-      console.log('grrrr', this);
-      console.log('it works!!');
-    }, this);
+    this.model.on('change:currentDir', this.switchModel , this);
+    this.model.get("currentDir").on("change", this.render, this);
+  },
+  switchModel: function(){
+    this.model.get("currentDir").on("change", this.render, this);
+    this.model.on('change:currentDir', this.switchModel , this);
+    this.render();
+
+
+  },
+  listenCurrentDir: function() {
+
+
+  },
+  unlistenCurrentDir: function() {
 
 
   },
   render: function() {
     var self = this;
+    console.log('this: ' , this);
+    console.log('the current drectory size', this.model.get('currentDir').attributes);
+    //debugger
     context = {
       path :       self.model.get('currentDir').get('path'),
       subfiles :   self.model.get('currentDir').get('contents'),
       isDirectory: self.model.get('currentDir').get('isDirectory'),
-      size:        self.model.get('currentDir').get('size')
+      size:        self.model.get('currentDir').get('size'),
+      greeting: 'what? this works?'
     };
     $('body > div#entry-point').html(self.template(context));
   },
@@ -86,18 +101,15 @@ window.AppView = Backbone.View.extend({
 
 
 
-
-
 $(document).ready(function() {
-  window.appView = new AppView({
-    model: app
+  $.when.apply(this, app.get('currentDir').get('pending')).done(function() {
+     window.appView = new AppView({
+      model: app
+    });
+
+    //kickstart the view rendering
+    appView.render();
   });
-
-  //kickstart the view rendering
-  appView.render();
-
-
 });
-
 
 
