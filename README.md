@@ -1,7 +1,7 @@
 Dropflowr
 ==============
 
-dropbox analytics
+dropbox music player/ file browser
 
 TODOS
   * create a directory controller
