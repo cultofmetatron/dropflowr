@@ -155,10 +155,10 @@ window.AppView = Backbone.View.extend({
     var self = this;
     //append the sidebar View of the current directory
     var context = {
-
+      path: this.model.get('currentDir').get('path')
 
     };
-    this.$el.html(self.template());
+    this.$el.html(self.template(context));
     (this.sidebarView !== undefined) ? this.sidebarView.remove() : null;
     this.sidebarView = new SidebarFileView({
       model: self.model.get('currentDir')
