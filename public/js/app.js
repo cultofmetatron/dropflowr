@@ -74,6 +74,13 @@ window.SidebarFileView = Backbone.View.extend({
   initialize: function() {
     this.id = Math.random();
     app.on('change:currentDir', this.remove, this);
+    //this.model.on('change', this.delegateEvents, this);
+  },
+  events: {
+    'click': function() {
+      alert('kazooo');
+    }
+
   },
   render: function() {
     this.$el.addClass('well').addClass('sidebar-nav');
@@ -89,20 +96,23 @@ window.SidebarFileView = Backbone.View.extend({
           output.push({
             path: contents[item].path,
             name: contents[item].name,
-            //node: (item.node || app.getDirectory(contents[item].path))
+            node: (item.node || app.getDirectory(contents[item].path))
           });
         }
         return output;
       }).call(self.model, self.model.get('contents'))
     };
-    console.log('context', context, this.id);
     this.$el.html(this.template(context));
-    return self;
+    this.delegateEvents();
+    return this;
   },
-  remove: function() {
-
+  folderaction: function(e) {
+    console.log('this doesn\'t fire');
+    e.preventDefault();
+    alert($(e.currentTarget).data('file'));
 
   }
+
 
 });
 
@@ -117,7 +127,7 @@ window.app = new App();
 window.AppView = Backbone.View.extend({
   tagName: 'div',
   template: window.Templates.application,
-  initialize: function() {
+  initialize: function(options) {
     this.model.on('change:currentDir', this.switchModel , this);
     this.model.get("currentDir").on("change", this.render, this);
   },
@@ -138,14 +148,18 @@ window.AppView = Backbone.View.extend({
       model: self.model.get('currentDir')
     });
 
-    this.$el.find('div#sidebar').html(this.sidebarView.render().el);
+    //this.$el.find('div#sidebar').html(this.sidebarView.render());
+    this.sidebarView.setElement('div#sidebar').render();
 
-    $('body > div#entry-point').html(this.el);
+
+    this.delegateEvents();
+    return this;
   },
   redraw : function() {
 
 
-  }
+  },
+
 });
 
 
@@ -157,7 +171,7 @@ $(document).ready(function() {
     });
 
     //kickstart the view rendering
-    appView.render();
+    $('body > div#entry-point').html(appView.render().$el);
   });
 });
 

@@ -127,8 +127,5 @@ remotes.pending = {};
 
 
 
-//setup the paths
-
-
 
 
