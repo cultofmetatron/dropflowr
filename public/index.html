@@ -60,7 +60,7 @@
   <script type="text/x-handlebars-template" data-template-name="_sidebar">
     <div class="well sidebar-nav">
       <p>{{size}}</p>
-      <ul class="nav nav-list">
+      <ul class="nav nav-list subfiles">
         <li class="nav-header">Sidebar</li>
         <li class="active"><a href="#">Link</a></li>
         <li><a href="#">Link</a></li>
@@ -72,9 +72,9 @@
     <p> #sidebarFile </p>
     <span> size: {{size}}</span>
     <span> size: {{path}}</span>
-    <ul class="nav nav-list">
+    <ul class="nav nav-list filelist">
     {{#each contents}}
-      <li><a data-file="{{this.path}}" href="">{{this.name}}</a></li>
+      <li><a data-file="{{this.path}}" href="#">{{this.name}}</a></li>
     {{/each}}
     </ul>
   </script>
