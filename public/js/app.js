@@ -89,12 +89,36 @@ var getType = function(name) {
   if (name.match(/.(pdf)$/)) {
     return "pdf";
   }
-  if (name.match(/.(txt|html)/)) {
+  if (name.match(/.(txt|html|rtf|mdn)/)) {
     return 'text';
   }
   return 'other';
 };
 
+window.SidebarAudioView = Backbone.View.extend({
+  model: Models.BinaryFile,
+  template: Templates.sidebarPlayer,
+  initialize: function() {
+    var self = this;
+    console.log('booting up the file', this.model.get('pending'));
+    $.when.apply(this, this.model.get('pending')).done(function() {
+      console.log('time to kickstart the downloads');
+      self.model.fetchFile();
+    });
+    this.model.on('change', this.render, this);
+
+  },
+  render: function() {
+    var self = this;
+    var context = {
+      sourcePath: self.model.getBinaryUrl()
+
+    };
+    this.$el.html(this.template(context));
+    return this;
+  }
+
+});
 
 window.SidebarFileView = Backbone.View.extend({
   model: Models.File,
@@ -117,6 +141,8 @@ window.SidebarFileView = Backbone.View.extend({
       path :       self.model.get('path'),
       isDirectory: self.model.get('isDirectory'),
       size:        self.model.get('size'),
+      mime_type:   self.model.get('mime_type'),
+      is_dir:      self.model.get('is_dir'),
       contents: (function(contents) {
         var output = [];
         for (var item in contents) {
@@ -133,6 +159,20 @@ window.SidebarFileView = Backbone.View.extend({
         return output;
       }).call(self.model, self.model.get('contents'))
     };
+
+    $.when.apply(this, self.model.get('pending')).done(function() {
+      if (!self.model.get('is_dir') && self.model.get('mime_type')) {
+        //console.log('rendering audio view');
+        if (self.model.get('mime_type').match(/^audio\//)) {
+          self.fileView = new SidebarAudioView({
+            model: new Models.BinaryFile({path:self.model.get('path')})
+          });
+          //set the view in the partial
+          console.log('rendering the audio view');
+          self.fileView.setElement('div#sidebarFileInfo').render();
+        }
+      }
+    });
     this.$el.html(this.template(context));
     this.delegateEvents();
     return this;

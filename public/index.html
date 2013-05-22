@@ -34,6 +34,13 @@
 
   </script>
 
+  <script type="text/x-handlebars-template" data-template-name="sidebarPlayer">
+    <audio src="{{sourcePath}}" control>
+      <p>sorry but you're browser does not support html5 audio</p>
+    </audio>
+  </script>
+
+
   <script type="text/x-handlebars-template" data-template-name="player">
     <audio src="{{currentSong}}" control>
       <p>sorry but you're browser does not support html5 audio</p>
@@ -66,24 +73,19 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars-template" data-template-name="_sidebar">
-    <div class="well sidebar-nav">
-      <p>{{size}}</p>
-      <ul class="nav nav-list subfiles">
-        <li class="nav-header">Sidebar</li>
-        <li class="active"><a href="#">Link</a></li>
-        <li><a href="#">Link</a></li>
-        </ul>
-      </div><!--/.well -->
-  </script>
-
   <script type="text/x-handlebars-template" data-template-name="sidebarFile">
-    <div> size: {{size}}</div>
+    <div id="sidebarFileInfo"></div>
+    {{#unless is_dir}}
+      <div> size: {{size}}</div>
+      <div> type: {{mime_type}}
+    {{/unless}}
     <div><a class="action" data-action="back" href='#'>Up one Directory</a></div>
+    {{#if is_dir}}
     <ul class="nav nav-list filelist">
-    {{#each contents}}
-    <li><a data-type="{{type}}" href="{{this.path}}">{{this.name}}</a></li>
-    {{/each}}
+      {{#each contents}}
+      <li><a data-type="{{type}}" href="{{this.path}}">{{this.name}}</a></li>
+      {{/each}}
+    {{/if}}
     </ul>
   </script>
 
