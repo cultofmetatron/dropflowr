@@ -35,6 +35,9 @@ window.App = Backbone.Model.extend({
   initialize: function() {
     this.get('directories').push(this.get('rootDir'));
     this.set('currentDir', this.get('rootDir'));
+    this.on('navigate', this.navigateTo, this );
+    this.on('back', this.back, this);
+
   },
   navigateTo: function(newDir) {
     this.get('history').push(this.get('currentDir'));
@@ -56,6 +59,12 @@ window.App = Backbone.Model.extend({
   },
   resetDir: function() {
     this.navigateTo(this.get('rootDir').get('path'));
+  },
+  back: function() {
+    if (this.get('history').length !== 0) {
+      var prev = this.get('history').pop();
+      this.set('currentDir', prev);
+    }
   }
 });
 
@@ -77,9 +86,8 @@ window.SidebarFileView = Backbone.View.extend({
     //this.model.on('change', this.delegateEvents, this);
   },
   events: {
-    'click': function() {
-      alert('kazooo');
-    }
+    'click ul.filelist a': 'navigate',
+    'click a.action'     : 'interceptAction'
 
   },
   render: function() {
@@ -106,14 +114,16 @@ window.SidebarFileView = Backbone.View.extend({
     this.delegateEvents();
     return this;
   },
-  folderaction: function(e) {
-    console.log('this doesn\'t fire');
+  navigate: function(e) {
     e.preventDefault();
-    alert($(e.currentTarget).data('file'));
-
+    var newPath = $(e.currentTarget).attr('href');
+    app.trigger('navigate', newPath);
+  },
+  interceptAction: function(e) {
+    e.preventDefault();
+    console.log($(e.currentTarget).data('action'));
+    app.trigger($(e.currentTarget).data('action'), $(e.currentTarget).data('action'));
   }
-
-
 });
 
 
@@ -130,6 +140,8 @@ window.AppView = Backbone.View.extend({
   initialize: function(options) {
     this.model.on('change:currentDir', this.switchModel , this);
     this.model.get("currentDir").on("change", this.render, this);
+
+
   },
   switchModel: function(){
     //switches directories and binds listening to the new current directory so that we can
@@ -142,6 +154,10 @@ window.AppView = Backbone.View.extend({
   render: function() {
     var self = this;
     //append the sidebar View of the current directory
+    var context = {
+
+
+    };
     this.$el.html(self.template());
     (this.sidebarView !== undefined) ? this.sidebarView.remove() : null;
     this.sidebarView = new SidebarFileView({
@@ -154,6 +170,10 @@ window.AppView = Backbone.View.extend({
 
     this.delegateEvents();
     return this;
+  },
+  back: function() {
+
+
   },
   redraw : function() {
 
