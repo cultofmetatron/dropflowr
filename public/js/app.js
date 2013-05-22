@@ -21,8 +21,10 @@ window.App = Backbone.Model.extend({
     /* pending holds a list of promises generated from async calls to
      * make successive async calls queue up after the current syncing is done
      *
-     * Directories holds info on all previously fetched directory data so we don't have to
+     * Directories holds info on all previously fetched data so we don't have to
      * hammer dropbox as much
+     *
+     * BinaryFiles holds a list of Binary files
      *
      * history holds a collection of reviously accessed hisories so we don't have to retrieve it
      * later on. backbutton functionality comming later
@@ -76,6 +78,24 @@ window.SidebarFileCollectionView = Backbone.View.extend({
   }
 });
 
+var getType = function(name) {
+  //return a type based on file extension
+  if (name.match(/.(mp3|flac|ogg|aac)$/)) {
+    return "audio";
+  }
+  if (name.match(/.(jpg|jpeg|png)$/)) {
+    return "image";
+  }
+  if (name.match(/.(pdf)$/)) {
+    return "pdf";
+  }
+  if (name.match(/.(txt|html)/)) {
+    return 'text';
+  }
+  return 'other';
+};
+
+
 window.SidebarFileView = Backbone.View.extend({
   model: Models.File,
   tagname: 'div',
@@ -83,14 +103,14 @@ window.SidebarFileView = Backbone.View.extend({
   initialize: function() {
     this.id = Math.random();
     app.on('change:currentDir', this.remove, this);
-    //this.model.on('change', this.delegateEvents, this);
+    //this.model.on('change', this.render, this);
   },
   events: {
-    'click ul.filelist a': 'navigate',
-    'click a.action'     : 'interceptAction'
-
+    'click ul.filelist a' : 'navigate',
+    'click a.action'      : 'interceptAction'
   },
   render: function() {
+    console.log('rerendering fileview');
     this.$el.addClass('well').addClass('sidebar-nav');
     var self = this;
     var context = {
@@ -101,11 +121,14 @@ window.SidebarFileView = Backbone.View.extend({
         var output = [];
         for (var item in contents) {
           //console.log('item', item);
-          output.push({
+          var data = {
             path: contents[item].path,
             name: contents[item].name,
             node: (item.node || app.getDirectory(contents[item].path))
-          });
+          };
+
+          data.type = getType(data.name);
+          output.push(data);
         }
         return output;
       }).call(self.model, self.model.get('contents'))
@@ -126,10 +149,25 @@ window.SidebarFileView = Backbone.View.extend({
   }
 });
 
+window.PlayerView = Backbone.View.extend({
+  model: Models.File,
+  template: Templates.player,
+  initialize: function() {
+    // app.on('change:currentSong', this.render, this);
+    // not necessary since we rerender the scene
+  },
+  playSong: function(song) {
+    this.$el.find('audio').attr('src', song.path);
+    this.render();
+  },
+  render: function() {
+    var context = {
+      path: this.model.getSongPath()
 
-
-
-
+    };
+    this.$el.html(this.template(context));
+  }
+});
 
 window.app = new App();
 
@@ -178,7 +216,7 @@ window.AppView = Backbone.View.extend({
   redraw : function() {
 
 
-  },
+  }
 
 });
 
