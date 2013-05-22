@@ -70,11 +70,12 @@
 
   <script type="text/x-handlebars-template" data-template-name="sidebarFile">
     <p> #sidebarFile </p>
-    <span> size: {{size}}</span>
-    <span> size: {{path}}</span>
+    <div> size: {{size}}</div>
+    <div> size: {{path}}</div>
+    <div><a class="action" data-action="back" href='#'>Up one Directory</a></div>
     <ul class="nav nav-list filelist">
     {{#each contents}}
-      <li><a data-file="{{this.path}}" href="#">{{this.name}}</a></li>
+    <li><a href="{{this.path}}">{{this.name}}</a></li>
     {{/each}}
     </ul>
   </script>
