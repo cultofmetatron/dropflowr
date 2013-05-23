@@ -38,12 +38,11 @@ remotes.pending = {};
     },
     initialize: function() {
       var self = this;
-      console.log('fetching path :', self.path);
+
+      console.log('fetching path :', self.get('path'));
       if (!!this.fetch) {
         remotes.pending['dropbox'](function(dropboxClient) {
-          var trigger = $.Deferred();
-          self.get('pending').push(trigger.promise());
-          self.getInfo(trigger);
+          self.getInfo();
         });
       }
     },
@@ -52,24 +51,25 @@ remotes.pending = {};
       obj.node = new Models.File(obj.path);
       return obj.node;
     },
-    getInfo: function(defer) {
+    getInfo: function(trigger) {
       var self = this;
       var defer = $.Deferred();
       remotes.dropboxClient.stat(self.get('path'), function(err, data) {
+        if (err) {console.log('there was an err: ', err); defer.resolve(); return null;  }
         console.log(data);
         for (var key in data._json) {
           self.set(key, data._json[key]);
         }
-        defer.resolve( self.get('stats'));
-        (defer) ? defer.resolve() : null ;
+        defer.resolve();
         if (self.get('is_dir') === true) {
           self.set('isDirectory', true);
           self.getContents();
         } else {
           self.set('isDirectory', false);
         }
-        console.log('changing', self)
+        console.log('changing', self);
         self.trigger('change');
+        self.set('pending', []);
 
       });
       self.get('pending').push(defer.promise());
@@ -81,7 +81,7 @@ remotes.pending = {};
       var defer = $.Deferred();
       remotes.dropboxClient.readdir(self.get('path'), function(err, entries) {
         //now fetch the names of files it owns
-        if (err) {console.log(err); return "error";}
+        if (err) {console.log(err); defer.resolve(); return "error";}
         entries.forEach(function(entry) {
 
           self.get('contents')[entry] = {
@@ -93,15 +93,6 @@ remotes.pending = {};
             node: null
 
           };
-
-
-          /*
-            path: (function() {
-              //yea I know...
-              return (this.get('path') === '/') ?  '/' + entry : this.get('path') + entry;
-            }).call(self)
-            */
-
         defer.resolve();
         console.log('change we can believe in!!');
         self.trigger('change');
@@ -112,6 +103,45 @@ remotes.pending = {};
     }
 
   });
+
+  Models.BinaryFile = Models.File.extend({
+    initialize: function() {
+      console.log('file created');
+    },
+    isBinary: function() {
+      if (this.get('isDirectory')) {
+        return false;
+      }
+      return true;
+    },
+    fetchBinary: function() {
+      var self = this;
+        var defer = $.Deferred();
+        self.get('pending').push(defer.promise());
+        remotes.dropboxClient.readFile(self.get('path'), {blob: true }, function(err, data) {
+          console.log('this is getting called');
+          self.set('binaryContents' , data);
+          self.set('downloadUrl', URL.createObjectURL(self.get('binaryContents')));
+          self.set('loaded', true);
+          console.log('fetching the url');
+          defer.resolve(self.get('downloadUrl'));
+        });
+        return defer.promise();
+    },
+    getBinaryUrl: function() {
+      return this.get('downloadUrl');
+    },
+    type: function() {
+      return 'binary';
+    }
+  });
+
+  Models.AudioFile = Models.File.extend({
+
+
+  });
+
+
 
   Models.FileCollection = Backbone.Collection.extend({
     model: Models.File,
