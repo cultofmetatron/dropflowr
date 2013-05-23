@@ -41,6 +41,17 @@
   </script>
 
 
+  <script type="text/x-handlebars-template" data-template-name="playlist">
+    <h2>playlist</h2>
+    <ul class="playlist">
+      {{#each playlist}}
+      <li>song: {{this.path}}  {{this.name}}</li>
+      {{/each}}
+    </ul>
+  </script>
+
+
+
   <script type="text/x-handlebars-template" data-template-name="player">
     <audio src="{{currentSong}}" control>
       <p>sorry but you're browser does not support html5 audio</p>
@@ -78,6 +89,10 @@
     {{#unless is_dir}}
       <div> size: {{size}}</div>
       <div> type: {{mime_type}}
+      {{#if is_audio}}
+        <div><a class="action" data-action="play" href="{{path}}">Play</a></div>
+        <div><a class="action" data-action="queue" href="{{path}}">Add to Playlist</a></div>
+      {{/if}}
     {{/unless}}
     <div><a class="action" data-action="back" href='#'>Up one Directory</a></div>
     {{#if is_dir}}

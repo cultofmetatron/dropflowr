@@ -32,14 +32,21 @@ window.App = Backbone.Model.extend({
     pending: [],
     rootDir: new Models.File({}),
     directories: new Models.FileCollection(),
-    history: new Models.FileCollection()
+    history: new Models.FileCollection(),
+    playlist: new Models.FileCollection()
   },
   initialize: function() {
     this.get('directories').push(this.get('rootDir'));
     this.set('currentDir', this.get('rootDir'));
     this.on('navigate', this.navigateTo, this );
     this.on('back', this.back, this);
+  },
+  play: function() {
+    this.set('currentSong', this.get('currentDir'));
 
+  },
+  queue: function(song) {
+    this.get('playlist').push(song);
   },
   navigateTo: function(newDir) {
     this.get('history').push(this.get('currentDir'));
@@ -69,6 +76,7 @@ window.App = Backbone.Model.extend({
     }
   }
 });
+
 
 window.SidebarFileCollectionView = Backbone.View.extend({
   collection: Models.FileCollection,
@@ -143,6 +151,7 @@ window.SidebarFileView = Backbone.View.extend({
       size:        self.model.get('size'),
       mime_type:   self.model.get('mime_type'),
       is_dir:      self.model.get('is_dir'),
+      is_audio:    (self.model.get('mime_type'))? !! self.model.get('mime_type').match(/^audio\//) : null ,
       contents: (function(contents) {
         var output = [];
         for (var item in contents) {
@@ -159,20 +168,26 @@ window.SidebarFileView = Backbone.View.extend({
         return output;
       }).call(self.model, self.model.get('contents'))
     };
-
-    $.when.apply(this, self.model.get('pending')).done(function() {
-      if (!self.model.get('is_dir') && self.model.get('mime_type')) {
-        //console.log('rendering audio view');
-        if (self.model.get('mime_type').match(/^audio\//)) {
-          self.fileView = new SidebarAudioView({
-            model: new Models.BinaryFile({path:self.model.get('path')})
-          });
-          //set the view in the partial
-          console.log('rendering the audio view');
-          self.fileView.setElement('div#sidebarFileInfo').render();
+    if (!self.fileView) {
+      $.when.apply(this, self.model.get('pending')).done(function() {
+        if (!self.model.get('is_dir') && self.model.get('mime_type')) {
+          //console.log('rendering audio view');
+          if (self.model.get('mime_type').match(/^audio\//)) {
+            self.fileView = new SidebarAudioView({
+              model: new Models.BinaryFile({path:self.model.get('path')})
+            });
+            //set the view in the partial
+            console.log('rendering the audio view');
+            self.fileView.setElement('div#sidebarFileInfo').render();
+          }
         }
-      }
-    });
+      });
+    }
+    else {
+      self.fileView.setElement('div#sidebarFileInfo').render();
+    }
+
+
     this.$el.html(this.template(context));
     this.delegateEvents();
     return this;
@@ -187,6 +202,8 @@ window.SidebarFileView = Backbone.View.extend({
     console.log($(e.currentTarget).data('action'));
     app.trigger($(e.currentTarget).data('action'), $(e.currentTarget).data('action'));
   }
+
+
 });
 
 window.PlayerView = Backbone.View.extend({
@@ -209,6 +226,34 @@ window.PlayerView = Backbone.View.extend({
   }
 });
 
+window.PlaylistView = Backbone.View.extend({
+  tagName: 'div',
+  template: Templates.playlist,
+  initialize: function() {
+    //this.collection.on('add', this.render, this);
+
+  },
+  render: function() {
+    this.$el.addClass('playlist');
+
+    var context = {
+      playlist: this.collection.map(function(song) {
+                  return {
+                      path: song.get('path'),
+                      name: song.get('name')
+                    };
+      })
+    };
+
+    this.$el.html(this.template(context));
+  },
+  events: {
+
+
+  }
+});
+
+
 window.app = new App();
 
 
@@ -218,6 +263,7 @@ window.AppView = Backbone.View.extend({
   initialize: function(options) {
     this.model.on('change:currentDir', this.switchModel , this);
     this.model.get("currentDir").on("change", this.render, this);
+    this.model.get('playlist').on('add', this.render, this);
 
 
   },
@@ -242,9 +288,16 @@ window.AppView = Backbone.View.extend({
       model: self.model.get('currentDir')
     });
 
+    this.playlistView = new PlaylistView({
+      collection: self.model.get('playlist')
+    });
+
+
+
+
     //this.$el.find('div#sidebar').html(this.sidebarView.render());
     this.sidebarView.setElement('div#sidebar').render();
-
+    this.playlistView.setElement('div#playlist').render();
 
     this.delegateEvents();
     return this;
