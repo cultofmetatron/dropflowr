@@ -15,15 +15,18 @@
     {{> navtop}}
     <div class="container-fluid">
       <div class="row-fluid">
-        <div id="sidebar" class="span3">
+        <div id="sidebar" class="span4">
 
-
-          <audio id="player" src="" controls>no audio for you</audio>
         </div>
-        <div class="span9">
+        <div class="span8">
           {{> breadcrumbs }}
           <div id="visual">
-            <p> nothing to see here yet </p>
+            <div id="player">
+
+            </div>
+            <div id="playlist">
+
+            </div>
           </div>
         </div>
       </div>
@@ -31,9 +34,38 @@
 
   </script>
 
+  <script type="text/x-handlebars-template" data-template-name="sidebarPlayer">
+
+  </script>
+
+
+  <script type="text/x-handlebars-template" data-template-name="playlist">
+    <h2>playlist</h2>
+    <ul class="playlist">
+      {{#each playlist}}
+      <li>song: {{this.path}}  {{this.name}}</li>
+      {{/each}}
+    </ul>
+  </script>
+
+
+
+  <script type="text/x-handlebars-template" data-template-name="player">
+    <h1>player</h1>
+    {{#if loaded}}
+    <audio src="{{currentSong}}" controls>
+      <p>sorry but you're browser does not support html5 audio</p>
+    </audio>
+    <p> now playing {{path}}</p>
+     {{/if}}
+    {{#unless loaded}}
+      <p>loading...</p>
+    {{/unless}}
+  </script>
+
   <script type="text/x-handlebars-template" data-template-name="_breadcrumbs">
     <ul class="breadcrumb">
-      <li><a href="#" class="active"></a> <span class="divider">/</span></li>
+      <li><a href="#" class="active">{{path}}</a> <span class="divider">/</span></li>
     </ul>
   </script>
 
@@ -57,26 +89,23 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars-template" data-template-name="_sidebar">
-    <div class="well sidebar-nav">
-      <p>{{size}}</p>
-      <ul class="nav nav-list subfiles">
-        <li class="nav-header">Sidebar</li>
-        <li class="active"><a href="#">Link</a></li>
-        <li><a href="#">Link</a></li>
-        </ul>
-      </div><!--/.well -->
-  </script>
-
   <script type="text/x-handlebars-template" data-template-name="sidebarFile">
-    <p> #sidebarFile </p>
-    <div> size: {{size}}</div>
-    <div> size: {{path}}</div>
+    <div id="sidebarFileInfo"></div>
+    {{#unless is_dir}}
+      <div> size: {{size}}</div>
+      <div> type: {{mime_type}}
+      {{#if is_audio}}
+        <div><a class="action" data-action="play" href="{{path}}">Play</a></div>
+        <div><a class="action" data-action="queue" href="{{path}}">Add to Playlist</a></div>
+      {{/if}}
+    {{/unless}}
     <div><a class="action" data-action="back" href='#'>Up one Directory</a></div>
+    {{#if is_dir}}
     <ul class="nav nav-list filelist">
-    {{#each contents}}
-    <li><a href="{{this.path}}">{{this.name}}</a></li>
-    {{/each}}
+      {{#each contents}}
+      <li><a data-type="{{type}}" href="{{this.path}}">{{this.name}}</a></li>
+      {{/each}}
+    {{/if}}
     </ul>
   </script>
 
