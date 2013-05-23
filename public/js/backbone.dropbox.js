@@ -105,6 +105,9 @@ remotes.pending = {};
   });
 
   Models.BinaryFile = Models.File.extend({
+    initialize: function() {
+      console.log('file created');
+    },
     isBinary: function() {
       if (this.get('isDirectory')) {
         return false;
@@ -119,6 +122,8 @@ remotes.pending = {};
           console.log('this is getting called');
           self.set('binaryContents' , data);
           self.set('downloadUrl', URL.createObjectURL(self.get('binaryContents')));
+          self.set('loaded', true);
+          console.log('fetching the url');
           defer.resolve(self.get('downloadUrl'));
         });
         return defer.promise();

@@ -40,13 +40,22 @@ window.App = Backbone.Model.extend({
     this.set('currentDir', this.get('rootDir'));
     this.on('navigate', this.navigateTo, this );
     this.on('back', this.back, this);
+    this.on('queue', this.queue, this);
+    this.on('play', this.play, this);
+
   },
   play: function() {
-    this.set('currentSong', this.get('currentDir'));
+    var self = this;
+    console.log('app.play');
+    this.set('currentSong', new Models.BinaryFile({path: this.get('currentDir').get('path')}));
+    this.get('currentSong').fetchBinary().done(function() {
+      self.trigger('songLoaded');
+    });
 
   },
   queue: function(song) {
-    this.get('playlist').push(song);
+    console.log('song is queing up');
+    this.get('playlist').push(this.get('currentDir'));
   },
   navigateTo: function(newDir) {
     this.get('history').push(this.get('currentDir'));
@@ -140,6 +149,7 @@ window.SidebarFileView = Backbone.View.extend({
   events: {
     'click ul.filelist a' : 'navigate',
     'click a.action'      : 'interceptAction'
+
   },
   render: function() {
     console.log('rerendering fileview');
@@ -212,15 +222,18 @@ window.PlayerView = Backbone.View.extend({
   initialize: function() {
     // app.on('change:currentSong', this.render, this);
     // not necessary since we rerender the scene
+    //app.on('change:currentSong', this.remove, this);
   },
   playSong: function(song) {
     this.$el.find('audio').attr('src', song.path);
     this.render();
   },
   render: function() {
+    var self = this;
     var context = {
-      path: this.model.getSongPath()
-
+      currentSong: self.model.getBinaryUrl() || '#',
+      loaded: self.model.get('loaded') || false,
+      path: self.model.get('path')
     };
     this.$el.html(this.template(context));
   }
@@ -264,6 +277,8 @@ window.AppView = Backbone.View.extend({
     this.model.on('change:currentDir', this.switchModel , this);
     this.model.get("currentDir").on("change", this.render, this);
     this.model.get('playlist').on('add', this.render, this);
+    this.model.on('songLoaded', this.render , this);
+    this.model.on('change:currentSong', this.render, this);
 
 
   },
@@ -288,6 +303,14 @@ window.AppView = Backbone.View.extend({
       model: self.model.get('currentDir')
     });
 
+    (this.playerView != undefined) ? this.playerView.remove() : null;
+    if (this.model.get('currentSong')) {
+      this.playerView = new PlayerView({
+        model: self.model.get('currentSong')
+      });
+    }
+
+    (this.playerlistView != undefined) ? this.playerlistView.remove() : null;
     this.playlistView = new PlaylistView({
       collection: self.model.get('playlist')
     });
@@ -298,6 +321,8 @@ window.AppView = Backbone.View.extend({
     //this.$el.find('div#sidebar').html(this.sidebarView.render());
     this.sidebarView.setElement('div#sidebar').render();
     this.playlistView.setElement('div#playlist').render();
+    //only renders this view if a song is set
+    (this.model.get('currentSong') !== undefined) ? this.playerView.setElement('div#player').render() : null;
 
     this.delegateEvents();
     return this;

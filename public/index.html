@@ -35,9 +35,7 @@
   </script>
 
   <script type="text/x-handlebars-template" data-template-name="sidebarPlayer">
-    <audio src="{{sourcePath}}" control>
-      <p>sorry but you're browser does not support html5 audio</p>
-    </audio>
+
   </script>
 
 
@@ -53,9 +51,16 @@
 
 
   <script type="text/x-handlebars-template" data-template-name="player">
-    <audio src="{{currentSong}}" control>
+    <h1>player</h1>
+    {{#if loaded}}
+    <audio src="{{currentSong}}" controls>
       <p>sorry but you're browser does not support html5 audio</p>
     </audio>
+    <p> now playing {{path}}</p>
+     {{/if}}
+    {{#unless loaded}}
+      <p>loading...</p>
+    {{/unless}}
   </script>
 
   <script type="text/x-handlebars-template" data-template-name="_breadcrumbs">
