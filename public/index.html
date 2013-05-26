@@ -51,14 +51,14 @@
 
 
   <script type="text/x-handlebars-template" data-template-name="player">
-    <h1>player</h1>
     {{#if loaded}}
-    <audio src="{{currentSong}}" controls>
+    <audio src="{{currentSong}}" controls autoplay>
       <p>sorry but you're browser does not support html5 audio</p>
     </audio>
     <p> now playing {{path}}</p>
      {{/if}}
     {{#unless loaded}}
+      <img src="/img/ajax-loader.gif" alt="loading">
       <p>loading...</p>
     {{/unless}}
   </script>
@@ -103,7 +103,7 @@
     {{#if is_dir}}
     <ul class="nav nav-list filelist">
       {{#each contents}}
-      <li><a data-type="{{type}}" href="{{this.path}}">{{this.name}}</a></li>
+      <li><a class="{{type}}" data-type="{{type}}" href="{{this.path}}">{{this.name}}</a></li>
       {{/each}}
     {{/if}}
     </ul>
