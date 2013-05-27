@@ -4,3 +4,4 @@ public/node_modules
 public/node_modules/*
 _public-backup
 _public-backup/*
+.env
